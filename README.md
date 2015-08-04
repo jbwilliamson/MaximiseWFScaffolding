@@ -5,7 +5,9 @@ ASP.NET Web Forms Scaffolding
 
 _Scaffolding for Web Forms in Visual Studio 2013_. Given a model class, the Web Forms Scaffolder generates List, Insert, Edit, and Delete pages. The Web Forms Scaffolder uses the Entity Framework, Bootstrap and Dynamic Data.
 
-![Edit Form](/READMEImages/EditForm.png "Edit Form")
+![Edit Form](/READMEImages/MainExample.png "Edit Form")
+
+![List Model](/READMEImages/MainList.png "List Model")
 
 ## Installing the Web Forms Scaffolder
 
@@ -133,13 +135,12 @@ The Web Forms Scaffolder takes advantage of Bootstrap for styling the pages. You
 
 ## Client Validation
 
-The tool supports client validation (inaddtional to server side) using the model validation annotated attributes.  You can select either the use of HTML5 validation or 'MS Unobtrusive Validation Library' when scaffolding.  The Unobtrusive validation is best if you wish to support older pre-HTML5 web browsers.  You will need to install the Unobtrusive library into your project from Nuget, if needed.
+The tool supports client validation (in addtional to server side) using the model validation annotated attributes.  You can select either the use of HTML5 validation or 'MS Unobtrusive Validation Library' when scaffolding.  The Unobtrusive validation is best if you wish to support pre-HTML5 web browsers.  You will need to install the Unobtrusive library into your project from Nuget, if required.
 
-![HTML5 Client Validation](/READMEImages/ClientValidation.png "HTML5 Client Validation")
+![HTML5 Client Validation](/READMEImages/ClientValidation1.png "HTML5 Client Validation")
 
 
 ## Samples
 
-The solution includes a smaple project to demostrate the enhancements added to the project called 'RandomSchool'.  The project includes 7 scaffolded forms based on an imaginany school system which can be experimenred with.  A duplicate project is also included to show Aysnc in use.
+The solution includes a smaple project called 'RandomSchool'.  The project includes 7 scaffolded forms based on an imaginany school system, they are build from the models provided and help demostrate the enhancements added to the project. A duplicate project is also included to show Aysnc db calls.
 
-![HTML5 Client Validation](/READMEImages/ClientValidation.png "HTML5 Client Validation")
