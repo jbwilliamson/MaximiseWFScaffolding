@@ -3,7 +3,8 @@
   <Metadata>
     <Identity Id="MaximiseWFScaffolding.e12bf243-968e-4548-ac1c-086b662d4e95" Version="0.1.0" Language="en-US" Publisher="JWilliamson" />
     <DisplayName>Maximise Web Forms Scaffolding</DisplayName>
-    <Description xml:space="preserve">Enhances an existing WebFormsScaffolding project to provide many additional features for scaffolding a web forms projects from an EF datacontext and data model</Description>
+    <Description xml:space="preserve">Project to maximise the scaffolding of CRUD forms for ASP.NET web form projects with an EF datacontent and a data model.  The project taking the existing 'WebFormsScaffolding' project and makes many enhancements to make a near completed form.
+</Description>
     <MoreInfo>https://github.com/jbwilliamson/MaximiseWFScaffolding</MoreInfo>
     <License>LICENSE.txt</License>
     <Tags>Web Forms, Scaffolder, Scaffolding, Enhancement</Tags>
