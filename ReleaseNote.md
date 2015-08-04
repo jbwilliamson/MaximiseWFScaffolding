@@ -1,4 +1,4 @@
-ASP.NET Maximise your Web Forms Scaffolding
+Release note - Maximise Web Forms Scaffolding - v0.1.0
 ===================
 
 This projects forks the existing 'WebFormsScaffolding' and adds a number of useful enhancements to provide a better scaffolding experience
