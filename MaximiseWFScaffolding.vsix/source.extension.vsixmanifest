@@ -4,7 +4,7 @@
     <Identity Id="MaximiseWFScaffolding.e12bf243-968e-4548-ac1c-086b662d4e95" Version="0.1.0" Language="en-US" Publisher="JWilliamson" />
     <DisplayName>Maximise Web Forms Scaffolding</DisplayName>
     <Description xml:space="preserve">Enhances an existing WebFormsScaffolding project to provide many additional features for scaffolding a web forms projects from an EF datacontext and data model</Description>
-    <MoreInfo>https://github.com</MoreInfo>
+    <MoreInfo>https://github.com/jbwilliamson/MaximiseWFScaffolding</MoreInfo>
     <License>LICENSE.txt</License>
     <Tags>Web Forms, Scaffolder, Scaffolding, Enhancement</Tags>
   </Metadata>
