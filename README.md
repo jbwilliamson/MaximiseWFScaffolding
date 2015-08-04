@@ -1,7 +1,7 @@
 ASP.NET Web Forms Scaffolding
 ===================
 
- -- [View the ASP.NET Maximise Web Forms Scaffolder at the Visual Studio Gallery](http://visualstudiogallery.msdn.microsoft.com/a6c3614f-83be-4749-afbc-8da394b6ea86) --
+ -- [View the ASP.NET Maximise Web Forms Scaffolder at the Visual Studio Gallery]() --
 
 _Scaffolding for Web Forms in Visual Studio 2013_. Given a model class, the Web Forms Scaffolder generates List, Insert, Edit, and Delete pages. The Web Forms Scaffolder uses the Entity Framework, Bootstrap and Dynamic Data.
 
@@ -35,9 +35,11 @@ public class Course
     public virtual ICollection<Teacher> Teachers { get; set; }
     public virtual ICollection<Pupil> Pupils { get; set; }
 }
+```
 
 Next, you need to annotate the class attributes to configure the scaffold:
 
+```C#
 public class Course
 {
 	[Display(Name = "Class Id", Order = 1, ShortName = "Id")]
@@ -92,6 +94,7 @@ public class Course
 
     public virtual ICollection<Pupil> Pupils { get; set; }
 }
+```
 
 Next, define a location in your project to create the scaffolded view class, this can the roo folder, but would be best in a subfolder should as 'Maintain'. Each scaffolded model will be created in this folder in a view class.
 

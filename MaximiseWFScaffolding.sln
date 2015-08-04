@@ -9,6 +9,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaximiseWFScaffolding.vsix"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReadMe", "ReadMe", "{8A2A0736-503A-4F47-8499-0E85C26065F7}"
 	ProjectSection(SolutionItems) = preProject
+		READMEImages\AddNewScaffoldedItem.png = READMEImages\AddNewScaffoldedItem.png
+		READMEImages\AddWebFormsPages.png = READMEImages\AddWebFormsPages.png
+		READMEImages\AddWebFormsPages1.png = READMEImages\AddWebFormsPages1.png
+		READMEImages\AddWebFormsPages2.png = READMEImages\AddWebFormsPages2.png
+		READMEImages\Associations.png = READMEImages\Associations.png
+		READMEImages\ClientValidation.png = READMEImages\ClientValidation.png
+		READMEImages\EditForm.png = READMEImages\EditForm.png
+		READMEImages\FormList.png = READMEImages\FormList.png
+		READMEImages\InsertForm.png = READMEImages\InsertForm.png
+		READMEImages\Install.png = READMEImages\Install.png
 		README.md = README.md
 		ReadMe.txt = ReadMe.txt
 	EndProjectSection
