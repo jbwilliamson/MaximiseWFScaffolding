@@ -1,0 +1,29 @@
+﻿<#@ Template hostspecific="True" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ Output Extension="cs" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.UI.WebControls;
+using System.Threading.Tasks;
+
+namespace <#= DefaultNamespace #>.Repositories
+{
+    public interface IRepositoryAsync<TEntity, TKey> where TEntity : class
+    {
+        TEntity GetItem(TKey id);
+        IQueryable<TEntity> GetModelData(string[] includeModel, string filterData, string sortByExpression);
+		IQueryable<TEntity> GetModelData(string filterData, string sortByExpression);
+
+		Task<IQueryable> GetForeignListAsync(string foreignKeyModel, int keyType);
+
+        Task<int> InsertItemAsync(ModelMethodContext modelMethodContext);
+        Task<int> UpdateItemAsync(TKey id, ModelMethodContext modelMethodContext);
+        Task<int> DeleteItemAsync(TKey id, ModelMethodContext modelMethodContext);    
+	}
+}

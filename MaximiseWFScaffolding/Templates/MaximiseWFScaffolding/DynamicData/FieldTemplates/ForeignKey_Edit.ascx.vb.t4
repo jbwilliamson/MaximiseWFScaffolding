@@ -1,0 +1,133 @@
+<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ include file="../../WebForms/Imports.include.t4" #>
+Imports System.Web.DynamicData
+<#if(IsAsyncRepository) {#>
+Imports System.Threading;
+Imports System.Threading.Tasks;
+<#}#>
+
+Public Partial Class ForeignKey_EditField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
+
+	Public Property DataTypeName() As String
+		Get
+			Return m_DataTypeName
+		End Get
+		Set
+			m_DataTypeName = Value
+		End Set
+	End Property
+	Private m_DataTypeName As String
+
+	Public Property DataTextField() As String
+		Get
+			Return m_DataTextField
+		End Get
+		Set
+			m_DataTextField = Value
+		End Set
+	End Property
+	Private m_DataTextField As String
+
+	Public Property DataValueField() As String
+		Get
+			Return m_DataValueField
+		End Get
+		Set
+			m_DataValueField = Value
+		End Set
+	End Property
+	Private m_DataValueField As String
+
+	Private m_DefaultValue As String
+
+	Protected Sub Page_Load(sender As Object, e As EventArgs)
+		<#if(IsAsyncRepository) {#>
+		Dim asynctask As New PageAsyncTask(BeginTask)
+		Me.Page.RegisterAsyncTask(asynctask)
+		<#}else {#>
+		Dim queryResult As IQueryable = Nothing
+
+		If TypeOf Me.Page Is <#= FolderNamespace #>.Edit And Me.Mode = DataBoundControlMode.Edit Then
+			Dim pageEdit = TryCast(Me.Page, <#= FolderNamespace #>.Edit)
+			queryResult = Await pageEdit._repository.GetForeignList(DataTypeName)
+		End If
+
+		If TypeOf Me.Page Is <#= FolderNamespace #>.Insert And Me.Mode = DataBoundControlMode.Insert Then
+			Dim pageInsert = TryCast(Me.Page, <#= FolderNamespace #>.Insert)
+			queryResult = Await pageInsert._repository.GetForeignList(DataTypeName)
+		End If
+
+		DropDownList1.DataSource = queryResult
+		DropDownList1.DataTextField = DataTextField
+		DropDownList1.DataValueField = DataValueField
+		DropDownList1.DataBind()
+
+		If Me.Mode = DataBoundControlMode.Edit Then
+			DropDownList1.SelectedValue = defaultValue
+		End If
+		<#}#>
+    End Sub
+
+	<#if(IsAsyncRepository) {#>
+	Public Function BeginTask(ByVal sender As Object, ByVal e As EventArgs, ByVal cb As AsyncCallback, ByVal extraData As Object) As IAsyncResult
+
+		Dim queryResult As IQueryable = Nothing
+
+		If TypeOf Me.Page Is <#= FolderNamespace #>.comTheme.Edit AndAlso Me.Mode = DataBoundControlMode.Edit Then
+			Dim pageEdit = TryCast(Me.Page, <#= FolderNamespace #>.Edit)
+			queryResult = Await pageEdit._repository.GetForeignListAsync(DataTypeName)
+		End If
+
+		If TypeOf Me.Page Is <#= FolderNamespace #>.Insert AndAlso Me.Mode = DataBoundControlMode.Insert Then
+			Dim pageInsert = TryCast(Me.Page, <#= FolderNamespace #>.Insert)
+			queryResult = Await pageInsert._repository.GetForeignListAsync(DataTypeName)
+		End If
+
+		DropDownList1.DataSource = queryResult
+		DropDownList1.DataTextField = DataTextField
+		DropDownList1.DataValueField = DataValueField
+		DropDownList1.DataBind()
+
+		If Me.Mode = DataBoundControlMode.Edit Then
+			DropDownList1.SelectedValue = m_DefaultValue
+		End If
+
+	End Function
+	<#}#>
+
+	Protected Sub Page_Init(sender As Object, e As EventArgs)
+		Label1.Text = Column.DisplayName
+	End Sub
+
+	' show bootstrap has-error
+	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+		' if validation error then apply bootstrap has-error CSS class
+		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+	End Sub
+
+	Protected Overrides Sub OnDataBinding(e As EventArgs)
+		MyBase.OnDataBinding(e)
+		m_DefaultValue = FieldValueString;
+	End Sub
+
+	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+		' If it's an empty string, change it to null
+		Dim value As String = DropDownList1.SelectedValue
+		If [String].IsNullOrEmpty(value) Then
+			value = Nothing
+		End If
+
+		dictionary(Column.Name) = ConvertEditedValue(value)
+	End Sub
+
+
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return DropDownList1
+		End Get
+	End Property
+
+End Class

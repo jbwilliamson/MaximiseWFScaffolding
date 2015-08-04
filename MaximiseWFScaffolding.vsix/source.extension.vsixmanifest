@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="MaximiseWFScaffolding.e12bf243-968e-4548-ac1c-086b662d4e95" Version="0.1.0" Language="en-US" Publisher="JWilliamson" />
+    <DisplayName>Maximise Web Forms Scaffolding</DisplayName>
+    <Description xml:space="preserve">Enhances an existing WebFormsScaffolding project to provide many additional features for scaffolding a web forms projects from an EF datacontext and data model</Description>
+    <MoreInfo>https://github.com</MoreInfo>
+    <License>LICENSE.txt</License>
+    <Tags>Web Forms, Scaffolder, Scaffolding, Enhancement</Tags>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Version="[12.0,13.0)" Id="Microsoft.VisualStudio.Ultimate" />
+    <InstallationTarget Version="[12.0,13.0)" Id="Microsoft.VisualStudio.Premium" />
+    <InstallationTarget Version="[12.0,13.0)" Id="Microsoft.VisualStudio.Pro" />
+    <InstallationTarget Version="[12.0,13.0)" Id="Microsoft.VisualStudio.VSWinExpress" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="MaximiseWFScaffolding" Path="|MaximiseWFScaffolding|" />
+    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="ScaffoldFilter" Path="|ScaffoldFilter|" AssemblyName="|ScaffoldFilter;AssemblyName|" />
+  </Assets>
+</PackageManifest>

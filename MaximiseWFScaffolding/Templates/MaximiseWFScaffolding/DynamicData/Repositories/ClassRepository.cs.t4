@@ -1,0 +1,78 @@
+﻿<#@ Template hostspecific="True" language="C#" #>
+<#@ Output Extension="cs" #>
+<#@ include file="../../WebForms/Imports.include.t4" #><##>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.UI.WebControls;
+using ScaffoldFilter;
+
+namespace <#= DefaultNamespace #>.Repositories
+{
+    public class <#= ModelName #>Repository<TEntity, TKey> : RepositoryBase<TEntity, TKey> where TEntity : class
+    {
+        public <#= ModelName #>Repository() : base()
+        {
+        }
+
+		/// <summary>
+        /// Load the default list of items from the database, which may include one or more filter options
+        /// May include any foreign key tables for TEntity model
+		/// Can be sorted directed from the listview with optional sortByExpression
+        /// Returns an IQueryable list of TEntity which loads directly into the listview
+        /// </summary>
+        public IQueryable<TEntity> GetData([ScaffoldFilterParameter("<#= ModelName #>FilterDefault")]string filterData, string sortByExpression)
+        {
+<#			string includes = GetIncludeListCS();#>
+			<#=includes#>
+
+            if (sortByExpression == null)
+            {
+                System.Web.SessionState.HttpSessionState s = System.Web.HttpContext.Current.Session;
+
+                if (s != null)
+                {
+                    string sortExpression = s["<#= ModelName #>SortExpression"] == null ? string.Empty : s["<#= ModelName #>SortExpression"].ToString();
+                    SortDirection sortDirection = s["<#= ModelName #>SortDirection"] == null ? SortDirection.Ascending : (SortDirection)s["<#= ModelName #>SortDirection"];
+
+                    if (sortExpression != string.Empty) {
+                        sortByExpression = sortExpression + (sortDirection == SortDirection.Ascending ? "" : " DESC");
+                    }
+                }
+            }
+
+<#if (GetIncludeListCS().Length > 0) {#>
+			return base.GetModelData(includes, filterData, sortByExpression);
+<#}else{#>
+			return base.GetModelData(filterData, sortByExpression);
+<#}#>
+        }
+
+        public int UpdateItem(TKey <#=PrimaryKeyName#>, ModelMethodContext modelMethodContext)
+        {
+            return base.UpdateItemBase(<#=PrimaryKeyName#>, modelMethodContext);
+        }
+
+        public int DeleteItem(TKey <#=PrimaryKeyName#>, ModelMethodContext modelMethodContext)
+        {
+            return base.DeleteItemBase(<#=PrimaryKeyName#>, modelMethodContext);
+        }
+    }
+}
+
+<#+
+string GetIncludeListCS() {
+	var relatedProperties = ModelMetadata.RelatedEntities.ToDictionary(item => item.AssociationPropertyName);
+	
+	if (relatedProperties.Count > 0)
+	{
+		string returnArray = "string[] includes = new string[] {" + String.Join("", relatedProperties.Values.Select(property => String.Format("\"{0}\",", property.AssociationPropertyName)));
+		returnArray = returnArray.Substring(0, returnArray.Length-1) + "};";
+		return returnArray;
+	}
+	else
+	{
+		return "";
+	}
+}
+#>

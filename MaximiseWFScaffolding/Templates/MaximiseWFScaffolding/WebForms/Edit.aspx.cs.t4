@@ -1,0 +1,66 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="cs" #>
+<#@ include file="Imports.include.t4" #><##>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using <#= DefaultNamespace #>.Extenders;
+using <#= DefaultNamespace #>.Repositories;
+using <#= DefaultNamespace #>.FieldTemplates;
+<#if(IsAsyncRepository) {#>
+using System.Threading.Tasks;
+<#}#>
+using ScaffoldFilter;
+
+namespace <#= FolderNamespace #>
+{
+    public partial class Edit : System.Web.UI.Page
+    {
+<#if(IsAsyncRepository) {#>
+		private <#= ModelName #>RepositoryAsync<<#=FullModelName#>, <#=PrimaryKeyType#>?> _repository = new <#= ModelName #>RepositoryAsync<<#=FullModelName#>, <#=PrimaryKeyType#>?>();
+<#} else {#>
+		private <#= ModelName #>Repository<<#=FullModelName#>, <#=PrimaryKeyType#>?> _repository = new <#= ModelName #>Repository<<#=FullModelName#>, <#=PrimaryKeyType#>?>();
+<#}#>
+
+		protected void Page_Init()
+        {
+            fv<#= ModelName #>.SetDataMethodsObject(_repository);
+            fv<#= ModelName #>.RedirectToRouteOnItemCommand("~/<#=RelativePath#>/Default");
+            fv<#= ModelName #>.RedirectToRouteOnItemUpdated("~/<#=RelativePath#>/Default");
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+        }
+
+<#if(IsAsyncRepository) {#>
+		public async Task ForeignKeyEventHandler_LoadForeignKey(ForeignModelEventArgs e)
+        {
+            e.returnResults = await _repository.GetForeignListAsync(e.foreignKeyModel, e.keyType);
+        }
+<#} else {#>
+		public void ForeignKeyEventHandler_LoadForeignKey(ForeignModelEventArgs e)
+        {
+            e.returnResults = _repository.GetForeignList(e.foreignKeyModel, e.keyType);
+        }
+<#}#>
+
+        protected void dcForeignKey_Load(object sender, EventArgs e)
+        {
+            System.Web.DynamicData.DynamicControl dc = (System.Web.DynamicData.DynamicControl)sender;
+            ForeignKey_EditField fkef = (ForeignKey_EditField)dc.FieldTemplate;
+			
+			if (fkef != null)
+			{
+<#if(IsAsyncRepository) {#>
+				fkef.ForeignKey += new AsyncForeignKeyEventHandler(ForeignKeyEventHandler_LoadForeignKey);
+<#} else {#>
+				fkef.ForeignKey += new ForeignKeyEventHandler(ForeignKeyEventHandler_LoadForeignKey);
+<#}#>
+			}
+        }
+    }
+}

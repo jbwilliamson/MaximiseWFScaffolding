@@ -1,0 +1,28 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ include file="Imports.include.t4" #>
+Imports System.Data.Entity
+
+Public Partial Class <#=CodeBesideName#>
+	Inherits System.Web.UI.Page
+
+	Protected _db As New <#=DbContextTypeName #>()
+
+	Protected Sub Page_Load(sender As Object, e As EventArgs)
+	End Sub
+
+	' Model binding method to get List of <#=ModelName#> entries
+	' USAGE: <asp:ListView SelectMethod="GetData">
+	Public Function GetData() As IQueryable(Of <#=FullModelName#>)
+		Return _db.<#=PluralizedModelName #><#=GetIncludeExpressionsVB() #>
+	End Function
+
+	Protected Sub DropDownList1_SelectedIndexChanged(sender As Object, e as EventArgs)
+		Dim ddl As DropDownList = DirectCast(sender, DropDownList)
+        Dim dp As DataPager = ListView1.FindControl("DataPager1")
+        dp.PageSize = Convert.ToInt32(ddl.SelectedValue)
+	End Sub
+
+End Class
+
+<#@ include file="ModelMetadataFunctions.cs.include.t4" #>

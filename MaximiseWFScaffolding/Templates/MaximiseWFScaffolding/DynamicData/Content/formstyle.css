@@ -1,0 +1,12 @@
+input:focus:required:invalid {
+  background: pink url(ico_validation.png) 379px 3px no-repeat;
+}
+input:required:valid {
+  background-color: #fff;
+  background-position: 379px -61px;
+}
+
+input:invalid + label::after { content: ''; }
+input:valid + label::after { content: ''; }
+
+/*glyphicon glyphicon-ok*/

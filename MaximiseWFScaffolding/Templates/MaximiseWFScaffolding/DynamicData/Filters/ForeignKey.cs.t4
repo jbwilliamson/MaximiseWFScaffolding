@@ -1,0 +1,16 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="ascx" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+<%@ Control Language="C#" CodeBehind="ForeignKey.ascx.cs" Inherits="<#= DefaultNamespace #>.Filters.ForeignKeyFilter" %>
+<div runat="server" class="form-group">
+	<asp:DropDownList runat="server" ID="SFFilter_DropDownList1" 
+		AppendDataBoundItems="true"
+		AutoPostBack="True" 
+		CssClass="SFFilterDDFilter"
+		OnSelectedIndexChanged="SFFilter_DropDownList1_SelectedIndexChanged" OnLoad="SFFilter_DropDownList1_Load">
+	</asp:DropDownList>
+</div>

@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace RandomSchool.Extenders
+{
+    public static class ValidationConstants
+    {
+        public const string Validation_Required_DefaultError = "Field is required";
+        public const string Validation_Length_DefaultError = "Invalid length";
+        public const string Validation_Pattern_DefaultError = "Pattern Mis-match";
+        public const string Validation_Range_DefaultError = "Value outside accepted range";
+        public const string Validation_Integer_DefaultError = "field accepts numbers only"; 
+
+        // Regular expression fior date as yyyy-mm-yy or yyyy/mm/dd
+        public const string Date_ValidationRegExpr = @"^(19|20)\d\d[-/](0[1-9]|1[012])[-/](0[1-9]|[12][0-9]|3[01])$";
+        public const string Date_ValidationRegError = "Date format: yyyy-mm-dd";
+
+        // Regular expression fior date as yyyy-mm-yy hh:mm or yyyy/mm/dd hh:mm
+        public const string DateTime_ValidationRegExpr = @"^(19|20)\d\d[-/](0[1-9]|1[012])[-/](0[1-9]|[12][0-9]|3[01]) (20|21|22|23|[0-1]?\d{1}):([0-5]?\d{1})$";
+        public const string DateTime_ValidationRegError = "Datetime format: yyyy-mm-dd hh:mm";
+
+		public const string Decimal_ValidationRegExpr = @"^(\d+\.?\d{0,9}|\.\d{1,9})$";
+		public const string Decimal_ValidationRegError = "field requires a valid decimal number";
+
+		public const string URL_ValidationRegExpr = @"https?://.+";
+		public const string URL_ValidationRegError = "Please enter a correctly formatted URL";
+
+		public const string EMAIL_ValidationRegExpr = @"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+		public const string EMAIl_ValidationRegError = "Please enter a valid email address";
+	}
+}

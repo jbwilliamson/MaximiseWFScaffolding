@@ -1,0 +1,2 @@
+﻿<%@ Control Language="C#" CodeBehind="Url.ascx.cs" Inherits="RandomSchoolAsync.FieldTemplates.UrlField" %>
+<asp:HyperLink ID="HyperLinkUrl" runat="server" Text="<%# FieldValueString %>" Target="_blank" />

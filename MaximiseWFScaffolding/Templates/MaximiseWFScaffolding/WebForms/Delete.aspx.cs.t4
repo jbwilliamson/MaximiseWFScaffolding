@@ -1,0 +1,37 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="cs" #>
+<#@ include file="Imports.include.t4" #><##>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+using <#= DefaultNamespace #>.Extenders;
+using <#= DefaultNamespace #>.Repositories;
+
+namespace <#= FolderNamespace #>
+{
+    public partial class Delete : System.Web.UI.Page
+    {
+<#if(IsAsyncRepository) {#>
+		private <#= ModelName #>RepositoryAsync<<#=FullModelName#>, <#=PrimaryKeyType#>> _repository = new <#= ModelName #>RepositoryAsync<<#=FullModelName#>, <#=PrimaryKeyType#>>();
+<#} else {#>
+		private <#= ModelName #>Repository<<#=FullModelName#>, <#=PrimaryKeyType#>> _repository = new <#= ModelName #>Repository<<#=FullModelName#>, <#=PrimaryKeyType#>>();
+<#}#>
+
+		protected void Page_Init()
+        {
+            fv<#= ModelName #>.SetDataMethodsObject(_repository);
+            fv<#= ModelName #>.RedirectToRouteOnItemDeleted("~/<#=RelativePath#>/Default");
+            fv<#= ModelName #>.RedirectToRouteOnItemCommand("~/<#=RelativePath#>/Default");
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+        }
+    }
+}
+
+<#@ include file="ModelMetadataFunctions.cs.include.t4" #>
