@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReadMe", "ReadMe", "{8A2A07
 		READMEImages\MainList2.png = READMEImages\MainList2.png
 		README.md = README.md
 		ReadMe.txt = ReadMe.txt
+		ReleaseNote.md = ReleaseNote.md
 		ReleaseNotes.txt = ReleaseNotes.txt
 	EndProjectSection
 EndProject
