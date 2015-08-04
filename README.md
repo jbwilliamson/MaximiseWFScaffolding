@@ -1,17 +1,17 @@
-ASP.NET Web Forms Scaffolding
+ASP.NET Maximise your Web Forms Scaffolding
 ===================
 
  -- [View the ASP.NET Maximise Web Forms Scaffolder at the Visual Studio Gallery]() --
 
-_Scaffolding for Web Forms in Visual Studio 2013_. Given a model class, the Web Forms Scaffolder generates List, Insert, Edit, and Delete pages. The Web Forms Scaffolder uses the Entity Framework, Bootstrap and Dynamic Data.
+_Scaffolding for Web Forms in Visual Studio 2013_. Given a model class, the Maximise Web Forms Scaffolder generates List, detail, Insert, Edit, and Delete pages. The Maximise Web Forms Scaffolder uses the Entity Framework, Bootstrap and Dynamic Data.
 
 ![Edit Form](/READMEImages/MainExample2.png "Edit Form")
 
 ![List Model](/READMEImages/MainList2.png "List Model")
 
-## Installing the Web Forms Scaffolder
+## Installing the Maximise Web Forms Scaffolder
 
-The Web Forms Scaffolder requires Visual Studio 2013 _Update 5_. It supports C# (Visual Basic updated soon)
+The Maximise Web Forms Scaffolder requires Visual Studio 2013 _Update 5_. It supports C# (Visual Basic updated soon).
 
 You can install the Maximise Web Forms Scaffolder directly from within Visual Studio. Select the menu option Tools, Extensions and Updates, and install the Maximise Web Forms Scaffolder.
 
@@ -131,7 +131,7 @@ The Maximise Web Forms Scaffolder uses Dynamic Data templates. If you want to cu
 
 The project supports filters for Enumeration and Associated Entities, these can also be customised using the DynamicData/Filters templates.
 
-The Web Forms Scaffolder takes advantage of Bootstrap for styling the pages. You aren't required to use Bootstrap with the Maximise Web Forms Scaffolder. However, if you don't use Bootstrap then you are responsible for creating your own Cascading Style Sheet. Learn more about Bootstrap at http://getbootstrap.com/   
+The Maximise Web Forms Scaffolder takes advantage of Bootstrap for styling the pages. You aren't required to use Bootstrap with the Maximise Web Forms Scaffolder. However, if you don't use Bootstrap then you are responsible for creating your own Cascading Style Sheet. Learn more about Bootstrap at http://getbootstrap.com/   
 
 ## Client Validation
 
