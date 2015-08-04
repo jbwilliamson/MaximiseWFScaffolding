@@ -5,9 +5,9 @@ ASP.NET Web Forms Scaffolding
 
 _Scaffolding for Web Forms in Visual Studio 2013_. Given a model class, the Web Forms Scaffolder generates List, Insert, Edit, and Delete pages. The Web Forms Scaffolder uses the Entity Framework, Bootstrap and Dynamic Data.
 
-![Edit Form](/READMEImages/MainExample1.png "Edit Form")
+![Edit Form](/READMEImages/MainExample2.png "Edit Form")
 
-![List Model](/READMEImages/MainList1.png "List Model")
+![List Model](/READMEImages/MainList2.png "List Model")
 
 ## Installing the Web Forms Scaffolder
 
