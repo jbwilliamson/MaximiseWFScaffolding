@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReadMe", "ReadMe", "{8A2A07
 		READMEImages\MainList2.png = READMEImages\MainList2.png
 		README.md = README.md
 		ReadMe.txt = ReadMe.txt
+		ReleaseNotes.txt = ReleaseNotes.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaffoldFilter", "ScaffoldFilter\ScaffoldFilter.csproj", "{D9438E02-267B-42CE-963C-04FBE8558091}"

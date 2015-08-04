@@ -1,8 +1,6 @@
 ASP.NET Maximise your Web Forms Scaffolding
 ===================
 
- -- [View the ASP.NET Maximise Web Forms Scaffolder at the Visual Studio Gallery]() --
-
 _Scaffolding for Web Forms in Visual Studio 2013_. Given a model class, the Maximise Web Forms Scaffolder generates List, detail, Insert, Edit, and Delete pages. The Maximise Web Forms Scaffolder uses the Entity Framework, Bootstrap and Dynamic Data.
 
 ![Edit Form](/READMEImages/MainExample2.png "Edit Form")
