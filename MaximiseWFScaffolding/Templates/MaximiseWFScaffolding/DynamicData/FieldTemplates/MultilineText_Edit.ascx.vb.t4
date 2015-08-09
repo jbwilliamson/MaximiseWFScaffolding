@@ -5,35 +5,70 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-Public Partial Class MultilineText_EditField
-	Inherits System.Web.DynamicData.FieldTemplateUserControl
+<#@ parameter type="System.String" name="ClientSideValidation" #>
+using <#= DefaultNamespace #>.Extenders;
 
-	Protected Sub Page_Init(sender As Object, e As EventArgs)
-		TextBox1.ToolTip = Column.Description
-		Label1.Text = Column.DisplayName
-		TextBox1.Attributes.Add("placeholder", Column.Prompt)
+Namespace <#= DefaultNamespace #>.FieldTemplates
+	Public Partial Class MultilineText_EditField
+		Inherits System.Web.DynamicData.FieldTemplateUserControl
 
-		If Column.IsRequired Then
-            TextBox1.Attributes.Add("data-val", "true")
-            TextBox1.Attributes.Add("data-val-required", Column.RequiredErrorMessage)
-		End If
-	End Sub
+		Public Property SetFocus() As String
+			Get
+				Return m_SetFocus
+			End Get
+			Set
+				m_SetFocus = Value
+			End Set
+		End Property
+		Private m_SetFocus As String
 
-	' show bootstrap has-error
-	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
-		' if validation error then apply bootstrap has-error CSS class
-		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
-		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+		Protected Sub Page_Init(sender As Object, e As EventArgs)
+			If Not IsPostBack Then
+				TextBox1.ToolTip = Column.Description
+				Label1.Text = Column.DisplayName + " :"
 
-	End Sub
+				If Column.Prompt IsNot Nothing AndAlso Column.Prompt.Length > 0 Then
+					TextBox1.Attributes.Add("placeholder", Column.Prompt)
+				End If
 
-	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
-		dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
-	End Sub
+				If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
+					TextBox1.Attributes.Add("autofocus", "autofocus")
+				End If
 
-	Public Overrides ReadOnly Property DataControl() As Control
-		Get
-			Return TextBox1
-		End Get
-	End Property
-End Class
+
+				If Column.IsRequired Then
+
+					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+					TextBox1.Attributes.Add("data-val-clear", "")
+					TextBox1.Attributes.Add("required", "required")
+
+					TextBox1.Attributes.Add("oninvalid", "setCustomValidity(this.dataset.valRequired);")
+					TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.value.length > 0 ? this.dataset.valClear : this.dataset.valRequired);")
+
+					TextBox1.Attributes.Add("data-val", "true")
+
+					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+
+				End If
+			End If
+		End Sub
+
+		' show bootstrap has-error
+		Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+			' if validation error then apply bootstrap has-error CSS class
+			Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+			Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+
+		End Sub
+
+		Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+			dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
+		End Sub
+
+		Public Overrides ReadOnly Property DataControl() As Control
+			Get
+				Return TextBox1
+			End Get
+		End Property
+	End Class
+End Namespace

@@ -5,6 +5,9 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-Public Partial Class TextField
-	Protected Literal1 As Global.System.Web.UI.WebControls.Literal
-End Class
+
+Namespace <#= DefaultNamespace #>.FieldTemplates
+	Public Partial Class TextField
+		Protected Literal1 As Global.System.Web.UI.WebControls.Literal
+	End Class
+End Namespace

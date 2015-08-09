@@ -18,9 +18,9 @@
 Option Strict Off
 Option Explicit On
 
-
-
-Partial Public Class EnumerationField
+Namespace <#= DefaultNamespace #>.FieldTemplates
+	Partial Public Class EnumerationField
     
-    Protected Literal1 As Global.System.Web.UI.WebControls.Literal
-End Class
+		Protected Literal1 As Global.System.Web.UI.WebControls.Literal
+	End Class
+End Namespace

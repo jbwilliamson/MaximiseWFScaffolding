@@ -1,0 +1,81 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+Imports System.Collections.Generic
+Imports System.Linq
+Imports System.Linq.Expressions
+Imports System.Web.UI.WebControls
+Imports System.Threading.Tasks
+Imports ScaffoldFilter
+
+Namespace <#= DefaultNamespace #>.Repositories
+	Public Class <#= ModelName #>RepositoryAsync(Of TEntity As Class, TKey)
+		Inherits RepositoryBase(Of TEntity, TKey)
+		Public Sub New()
+			MyBase.New()
+		End Sub
+
+		''' <summary>
+		''' Load the default list of items from the database, which may include one or more filter options
+		''' May include any foreign key tables for TEntity model
+		''' Can be sorted directed from the listview with optional sortByExpression
+		''' Returns an IQueryable list of TEntity which loads directly into the listview
+		''' </summary>
+		Public Function GetData(<ScaffoldFilterParameter("<#= ModelName #>FilterDefault")> filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
+<#			string includes = GetIncludeListVB();#>
+			<#=includes#>
+			
+			If sortByExpression Is Nothing Then
+				Dim s As System.Web.SessionState.HttpSessionState = System.Web.HttpContext.Current.Session
+
+				If s IsNot Nothing Then
+					Dim sortExpression As String = If(s("<#= ModelName #>SortExpression") Is Nothing, String.Empty, s("<#= ModelName #>SortExpression").ToString())
+					Dim SortDirection As SDirection = If(s("<#= ModelName #>SortDirection") Is Nothing, SortDirection.Ascending, DirectCast(s("<#= ModelName #>SortDirection"), SortDirection))
+
+					If sortExpression <> String.Empty Then
+						sortByExpression = sortExpression & (If(SDirection = SortDirection.Ascending, "", " DESC"))
+					End If
+				End If
+			End If
+
+<#if (GetIncludeListCS().Length > 0) {#>
+			Return MyBase.GetModelData(includes, filterData, sortByExpression)
+<#}else{#>
+			Return MyBase.GetModelData(filterData, sortByExpression)
+<#}#>
+		End Function
+
+		Public Function InsertItem(modelMethodContext As ModelMethodContext) As Task(Of Integer)
+			Return Await MyBase.InsertItemAsync(modelMethodContext)
+		End Function
+
+		Public Function UpdateItem(<#=PrimaryKeyName#> As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer)
+			Return Await MyBase.UpdateItemAsync(<#=PrimaryKeyName#>, modelMethodContext)
+		End Function
+
+		Public Function DeleteItem(<#=PrimaryKeyName#> As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer)
+			Return Await MyBase.DeleteItemAsync(<#=PrimaryKeyName#>, modelMethodContext)
+		End Function
+	End Class
+End Namespace
+
+<#+
+string GetIncludeListVB() {
+	var relatedProperties = ModelMetadata.RelatedEntities.ToDictionary(item => item.AssociationPropertyName);
+	
+	if (relatedProperties.Count > 0)
+	{
+		string returnArray = "Dim includes As String() = New String() {" + String.Join("", relatedProperties.Values.Select(property => String.Format("\"{0}\",", property.AssociationPropertyName)));
+		returnArray = returnArray.Substring(0, returnArray.Length-1) + "}";
+		return returnArray;
+	}
+	else
+	{
+		return "";
+	}
+}
+#>

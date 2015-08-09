@@ -12,8 +12,6 @@ namespace RandomSchool.FieldTemplates
 {
     public partial class Date_EditField : System.Web.DynamicData.FieldTemplateUserControl 
 	{
-        private static DataTypeAttribute DefaultDateAttribute = new DataTypeAttribute(DataType.DateTime);
-  
 		public string SetFocus { get; set; }
 
 		protected void Page_Init(object sender, EventArgs e)

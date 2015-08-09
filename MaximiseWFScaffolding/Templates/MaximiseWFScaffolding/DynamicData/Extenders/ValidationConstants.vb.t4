@@ -1,0 +1,42 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="cs" #>
+<#@ assembly name="System.Core" #>
+<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+Imports System.ComponentModel.DataAnnotations
+Imports System.Web.DynamicData
+Imports System.Web
+
+Namespace <#= DefaultNamespace #>.Extenders
+	Public NotInheritable Class ValidationConstants
+		Private Sub New()
+		End Sub
+		Public Const Validation_Required_DefaultError As String = "Field is required"
+		Public Const Validation_Length_DefaultError As String = "Invalid length"
+		Public Const Validation_Pattern_DefaultError As String = "Pattern Mis-match"
+		Public Const Validation_Range_DefaultError As String = "Value outside accepted range"
+		Public Const Validation_Integer_DefaultError As String = "field accepts numbers only"
+
+		' Regular expression fior date as yyyy-mm-yy or yyyy/mm/dd
+		Public Const Date_ValidationRegExpr As String = "^(19|20)\d\d[-/](0[1-9]|1[012])[-/](0[1-9]|[12][0-9]|3[01])$"
+		Public Const Date_ValidationRegError As String = "Date format: yyyy-mm-dd"
+
+		' Regular expression fior date as yyyy-mm-yy hh:mm or yyyy/mm/dd hh:mm
+		Public Const DateTime_ValidationRegExpr As String = "^(19|20)\d\d[-/](0[1-9]|1[012])[-/](0[1-9]|[12][0-9]|3[01]) (20|21|22|23|[0-1]?\d{1}):([0-5]?\d{1})$"
+		Public Const DateTime_ValidationRegError As String = "Datetime format: yyyy-mm-dd hh:mm"
+
+		Public Const Decimal_ValidationRegExpr As String = "^(\d+\.?\d{0,9}|\.\d{1,9})$"
+		Public Const Decimal_ValidationRegError As String = "field requires a valid decimal number"
+
+		Public Const URL_ValidationRegExpr As String = "https?://.+"
+		Public Const URL_ValidationRegError As String = "Please enter a correctly formatted URL"
+
+		Public Const EMAIL_ValidationRegExpr As String = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+		Public Const EMAIl_ValidationRegError As String = "Please enter a valid email address"
+	End Class
+End Namespace

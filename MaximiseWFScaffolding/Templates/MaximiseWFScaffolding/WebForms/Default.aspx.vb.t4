@@ -1,28 +1,160 @@
 ﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
 <#@ include file="Imports.include.t4" #>
-Imports System.Data.Entity
+
+Imports System.Collections.Generic;
+Imports System.Linq;
+Imports System.Web;
+Imports System.Web.UI;
+Imports System.Web.UI.WebControls;
+Imports System.Web.UI.HtmlControls;
+Imports RandomSchool.Extenders;
+Imports RandomSchool.Repositories;
+Imports RandomSchool.Filters;
+Imports ScaffoldFilter;
 
 Public Partial Class <#=CodeBesideName#>
 	Inherits System.Web.UI.Page
 
-	Protected _db As New <#=DbContextTypeName #>()
+	Private _repository As New <#= ModelName #>Repository(Of <#=FullModelName#>, <#=PrimaryKeyType#>)()
+	Private FilterDefaults As New Dictionary(Of String, String)()
 
 	Protected Sub Page_Load(sender As Object, e As EventArgs)
+		lv<#= ModelName #>.SetDataMethodsObject(_repository)
+
+		If Not IsPostBack Then
+			Dim dp As DataPager = DirectCast(lv<#= ModelName #>.FindControl("dp<#= ModelName #>"), DataPager)
+			If dp IsNot Nothing Then
+				If Session("<#= ModelName #>CurrentPage") IsNot Nothing AndAlso Session("<#= ModelName #>PageSize") IsNot Nothing Then
+					dp.SetPageProperties(Convert.ToInt32(Session("<#= ModelName #>CurrentPage")), Convert.ToInt32(Session("<#= ModelName #>PageSize")), True)
+				Else
+					dp.SetPageProperties(0, 10, True)
+				End If
+			End If
+		End If
 	End Sub
 
-	' Model binding method to get List of <#=ModelName#> entries
-	' USAGE: <asp:ListView SelectMethod="GetData">
-	Public Function GetData() As IQueryable(Of <#=FullModelName#>)
-		Return _db.<#=PluralizedModelName #><#=GetIncludeExpressionsVB() #>
-	End Function
-
-	Protected Sub DropDownList1_SelectedIndexChanged(sender As Object, e as EventArgs)
+	Protected Sub ddlPageSize_SelectedIndexChanged(sender As Object, e As EventArgs)
 		Dim ddl As DropDownList = DirectCast(sender, DropDownList)
-        Dim dp As DataPager = ListView1.FindControl("DataPager1")
-        dp.PageSize = Convert.ToInt32(ddl.SelectedValue)
+		Dim dp As DataPager = DirectCast(lv<#= ModelName #>.FindControl("dp<#= ModelName #>"), DataPager)
+		dp.PageSize = Convert.ToInt32(ddl.SelectedValue)
+		Session("<#= ModelName #>PageSize") = dp.PageSize
+		dp.SetPageProperties(0, Convert.ToInt32(Session("<#= ModelName #>PageSize")), True)
 	End Sub
 
+	Protected Sub lv<#= ModelName #>_Sorting(sender As Object, e As ListViewSortEventArgs)
+		Session("<#= ModelName #>SortExpression") = e.SortExpression
+		Session("<#= ModelName #>SortDirection") = e.SortDirection
+		Session("<#= ModelName #>CurrentPage") = 0
+
+		DisplayedSortedArrows()
+	End Sub
+
+	Protected Sub lv<#= ModelName #>_PagePropertiesChanging(sender As Object, e As PagePropertiesChangingEventArgs)
+		Session("<#= ModelName #>CurrentPage") = e.StartRowIndex
+	End Sub
+
+	Protected Sub ddlPageSize_PreRender(sender As Object, e As EventArgs)
+		Dim ddl As DropDownList = DirectCast(sender, DropDownList)
+
+		If Session("<#= ModelName #>PageSize") IsNot Nothing Then
+			ddl.SelectedValue = Session("<#= ModelName #>PageSize").ToString()
+		End If
+	End Sub
+
+	Protected Sub ScaffoldLabel_PreRender(sender As Object, e As EventArgs)
+		Dim label As Label = DirectCast(sender, Label)
+		Dim scaffoldFilter As ScaffoldFilterControl = DirectCast(label.FindControl("ScaffoldFilter"), ScaffoldFilterControl)
+		Dim fuc As ScaffoldFilterUserControl = TryCast(scaffoldFilter.FilterTemplate, ScaffoldFilterUserControl)
+		If fuc IsNot Nothing AndAlso fuc.FilterControl IsNot Nothing Then
+			label.AssociatedControlID = fuc.FilterControl.GetUniqueIDRelativeTo(label)
+		End If
+	End Sub
+
+	Protected Sub ScaffoldFilter_FilterChanged(sender As Object, e As FilterChangeEventArgs)
+		Dim val As String
+
+		If Session("<#= ModelName #>FilterDefault") Is Nothing Then
+			If e.SelectedValue.Length > 0 Then
+				FilterDefaults.Add(e.FieldName, e.SelectedValue)
+				Session("<#= ModelName #>FilterDefault") = FilterDefaults
+			End If
+		Else
+			FilterDefaults = DirectCast(Session("<#= ModelName #>FilterDefault"), Dictionary(Of String, String))
+
+			If FilterDefaults.TryGetValue(e.FieldName, val) Then
+				If e.SelectedValue.Length > 0 Then
+					FilterDefaults(e.FieldName) = e.SelectedValue
+				Else
+					FilterDefaults.Remove(e.FieldName)
+				End If
+			Else
+				If e.SelectedValue.Length > 0 Then
+					FilterDefaults.Add(e.FieldName, e.SelectedValue)
+				End If
+			End If
+
+			Session("<#= ModelName #>FilterDefault") = FilterDefaults
+		End If
+
+		Dim dp As DataPager = DirectCast(lv<#= ModelName #>.FindControl("dp<#= ModelName #>"), DataPager)
+		If dp IsNot Nothing Then
+			dp.SetPageProperties(0, dp.PageSize, True)
+		End If
+	End Sub
+
+	Protected Sub ScaffoldFilter_FilterLoad(e As FilterLoadEventArgs)
+		If Not IsPostBack Then
+			If Session("<#= ModelName #>FilterDefault") IsNot Nothing Then
+				e.FilterDefaults = DirectCast(Session("<#= ModelName #>FilterDefault"), Dictionary(Of String, String))
+			End If
+		End If
+	End Sub
+
+	Public Sub ForeignKeyEventHandler_LoadForeignKey(e As ForeignModelEventArgs)
+		e.returnResults = _repository.GetForeignList(e.foreignKeyModel, e.keyType)
+	End Sub
+
+	Protected Sub sfForeignKey_Load(sender As Object, e As EventArgs)
+		Dim scaffoldFilter As ScaffoldFilterControl = DirectCast(sender, ScaffoldFilterControl)
+		Dim sfuc As ForeignKeyFilter = TryCast(scaffoldFilter.FilterTemplate, ForeignKeyFilter)
+
+		If sfuc IsNot Nothing Then
+			sfuc.ForeignKey += New ForeignKeyEventHandler(ForeignKeyEventHandler_LoadForeignKey)
+		End If
+	End Sub
+
+	Protected Sub lv<#= ModelName #>_LayoutCreated(sender As Object, e As EventArgs)
+		DisplayedSortedArrows()
+	End Sub
+
+	Protected Sub DisplayedSortedArrows()
+		Dim headerRow As Control = DirectCast(lv<#= ModelName #>.FindControl("headerRow"), Control)
+
+		If headerRow IsNot Nothing Then
+			If Session("<#= ModelName #>SortExpression") IsNot Nothing AndAlso Session("<#= ModelName #>SortDirection") IsNot Nothing Then
+				Dim se As String = Session("<#= ModelName #>SortExpression").ToString()
+				Dim sd As SortDirection = DirectCast(Session("<#= ModelName #>SortDirection"), SortDirection)
+
+				For Each tableCell As HtmlControl In headerRow.Controls
+					If tableCell.[GetType]() = GetType(HtmlTableCell) Then
+						Dim btnSortField As IButtonControl = tableCell.Controls.OfType(Of IButtonControl)().SingleOrDefault()
+						Dim gcArrow As HtmlGenericControl = tableCell.Controls.OfType(Of HtmlGenericControl)().SingleOrDefault()
+
+						If btnSortField IsNot Nothing AndAlso gcArrow IsNot Nothing Then
+							If btnSortField.CommandArgument = se Then
+								gcArrow.Attributes("class") = If(sd = SortDirection.Ascending, "glyphicon glyphicon-chevron-up", "glyphicon glyphicon-chevron-down")
+							Else
+								If gcArrow.Attributes("class") IsNot Nothing Then
+									gcArrow.Attributes.Remove("class")
+								End If
+							End If
+						End If
+					End If
+				Next
+			End If
+		End If
+	End Sub
 End Class
 
 <#@ include file="ModelMetadataFunctions.cs.include.t4" #>

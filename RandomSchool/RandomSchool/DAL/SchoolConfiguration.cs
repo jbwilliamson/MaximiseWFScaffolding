@@ -7,7 +7,6 @@ namespace RandomSchool.DAL
     {
         public SchoolConfiguration()
         {
-            //SetExecutionStrategy("System.Data.SqlClient", () => new SqlAzureExecutionStrategy());
         }
     }
 }

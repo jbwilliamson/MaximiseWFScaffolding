@@ -20,6 +20,11 @@ namespace RandomSchoolAsync.DAL
         public DbSet<Grade> Grades { get; set; }
         public DbSet<Grading> Gradings { get; set; }
 
+        public SchoolContext()
+        {
+            Database.SetInitializer(new SchoolInitializer());
+        }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();

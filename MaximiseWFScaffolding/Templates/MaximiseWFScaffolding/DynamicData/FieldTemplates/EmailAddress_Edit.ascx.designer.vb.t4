@@ -5,8 +5,11 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-Public Partial Class EmailAddress_EditField
-	Protected Div1 As Global.System.Web.UI.HtmlControls.HtmlGenericControl
-	Protected Label1 As Global.System.Web.UI.WebControls.Label
-	Protected TextBox1 As Global.System.Web.UI.WebControls.TextBox
-End Class
+
+Namespace <#= DefaultNamespace #>.FieldTemplates
+	Public Partial Class EmailAddress_EditField
+		Protected Div1 As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+		Protected Label1 As Global.System.Web.UI.WebControls.Label
+		Protected TextBox1 As Global.System.Web.UI.WebControls.TextBox
+	End Class
+End Namespace

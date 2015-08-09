@@ -18,6 +18,8 @@
 Option Strict Off
 Option Explicit On
 
-Partial Public Class DateTimeField
-    Protected Literal1 As Global.System.Web.UI.WebControls.Literal
-End Class
+Namespace <#= DefaultNamespace #>.FieldTemplates
+	Partial Public Class DateTimeField
+		Protected Literal1 As Global.System.Web.UI.WebControls.Literal
+	End Class
+End Namespace

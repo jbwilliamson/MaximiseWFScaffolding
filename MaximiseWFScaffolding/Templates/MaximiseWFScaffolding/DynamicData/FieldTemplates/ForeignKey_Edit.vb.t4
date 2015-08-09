@@ -12,9 +12,7 @@
 		<asp:DropDownList 
 			ID="DropDownList1"
 			CssClass="form-control"
-            AppendDataBoundItems="true"
-			Runat="server">
-                <asp:ListItem Text="Select An Option" Value=""></asp:ListItem>
-            </asp:DropDownList>
+			Runat="server" OnLoad="DropDownList1_Load">
+		</asp:DropDownList>
     </div>
 </div>

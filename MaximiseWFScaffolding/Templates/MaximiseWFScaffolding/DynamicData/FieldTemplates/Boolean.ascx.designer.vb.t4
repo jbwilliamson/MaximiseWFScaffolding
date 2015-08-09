@@ -14,13 +14,9 @@
 '     the code is regenerated.
 ' </auto-generated>
 '------------------------------------------------------------------------------
-
 Option Strict Off
 Option Explicit On
 
-
-
 Partial Public Class BooleanField
-    
     Protected CheckBox1 As Global.System.Web.UI.WebControls.CheckBox
 End Class

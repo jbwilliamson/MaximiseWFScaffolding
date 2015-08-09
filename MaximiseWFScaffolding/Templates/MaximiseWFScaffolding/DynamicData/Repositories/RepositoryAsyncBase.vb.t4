@@ -1,0 +1,243 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+Imports System.Collections.Generic
+Imports System.Linq
+Imports System.Linq.Expressions
+Imports System.Web.UI.WebControls
+Imports System.Data.Entity
+Imports System.Data.Entity.Infrastructure
+Imports System.Data.Entity.Core.Metadata.Edm
+Imports System.ComponentModel
+Imports System.Reflection
+Imports System.Threading.Tasks
+
+Imports Microsoft.AspNet.FriendlyUrls.ModelBinding
+Imports ScaffoldFilter
+Imports <#= DefaultNamespace #>.Extenders
+
+Namespace <#= DefaultNamespace #>.Repositories
+
+	Public Class RepositoryAsyncBase(Of TEntity As Class, TKey)
+		Implements IRepositoryAsync(Of TEntity, TKey)
+		
+		Private ReadOnly dbrepContext As <#= DbContextTypeName #> = New <#= DbContextTypeName #>()
+		Private ReadOnly dbrepSet As DbSet(Of TEntity)
+
+		Public Sub New()
+			dbrepSet = dbrepContext.[Set](Of TEntity)()
+		End Sub
+	End Class
+
+	''' <summary>
+	''' Retrieves one item of the TEntity class for edit or display
+	''' Note: Async and model binding do not play nice together, FormView will not bind to a return of a Task, so no async for getitem
+	''' </summary>
+	Public Function GetItem(<FriendlyUrlSegmentsAttribute(0)> id As TKey) As TEntity
+		If id Is Nothing Then
+			Return Nothing
+		End If
+
+		Return Me.dbrepSet.Find(id)
+	End Function
+
+	''' <summary>
+	''' Load the default list of items from the database, which may include one or more filter options
+	''' May include any foreign key tables for TEntity model
+	''' Returns an IQuerybale list of TEntity which loads directly into the listview
+	''' Note: Async and model binding do not play nice together, listview will not bind to a return of the Task proxy class, (4.6 framework provides a solution)
+	''' </summary>
+	Public Function GetModelData(includeModel As String(), filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
+		Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
+
+		If Not String.IsNullOrEmpty(filterData) Then
+			query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
+		End If
+
+		For Each m As String In includeModel
+			If m.Length > 0 Then
+				query = query.Include(m)
+			End If
+		Next
+
+		If sortByExpression IsNot Nothing Then
+			If sortByExpression.EndsWith(" DESC") Then
+				query = query.OrderByDescending(sortByExpression.Substring(0, sortByExpression.Length - 5))
+			Else
+				query = query.OrderBy(sortByExpression)
+			End If
+		End If
+
+		Return query
+	End Function
+
+	''' <summary>
+	''' Load the default list of items from the database, which may include one or more filter options
+	''' Returns an IQuerybale list of TEntity which loads directly into the listview
+	''' </summary>
+	Public Function GetModelData(filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
+		Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
+
+		If Not String.IsNullOrEmpty(filterData) Then
+			query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
+		End If
+
+		If sortByExpression IsNot Nothing Then
+			If sortByExpression.EndsWith(" DESC") Then
+				query = query.OrderByDescending(sortByExpression.Substring(0, sortByExpression.Length - 5))
+			Else
+				query = query.OrderBy(sortByExpression)
+			End If
+		End If
+
+		Return query
+	End Function
+
+	''' <summary>
+	''' Function to generate and compile a linq expression, based on the filter parameters passed to 'GetData'
+	''' </summary>
+	Private Function FilterOnModel(filterData As String) As Func(Of TEntity, Boolean)
+		Dim filterParameters As String() = filterData.Split(","C)
+		Dim type = GetType(TEntity)
+		Dim pe = Expression.Parameter(type, "p")
+		Dim filterExpression As Expression = Nothing
+
+		For Each parameter As String In filterParameters
+			Dim filterValues As String() = parameter.Split(":"C)
+
+			Dim modelField As PropertyInfo = type.GetProperties().Where(Function(p) p.Name = filterValues(0)).FirstOrDefault()
+			If modelField IsNot Nothing Then
+				Dim propertyReference = Expression.[Property](pe, filterValues(0))
+
+				Dim value As Object = TypeDescriptor.GetConverter(modelField.PropertyType).ConvertFromString(filterValues(1))
+				Dim propertyValue = Expression.Constant(value, modelField.PropertyType)
+				Dim compareExp = Expression.Equal(propertyReference, propertyValue)
+
+				filterExpression = If(filterExpression Is Nothing, compareExp, Expression.[AndAlso](filterExpression, compareExp))
+			End If
+		Next
+
+		Return Expression.Lambda(Of Func(Of TEntity, Boolean))(filterExpression, pe).Compile()
+	End Function
+
+	''' <summary>
+	''' Generic function to retrieve a foreignkey table, returns an IQueryable of unknow type
+	''' keyType = ForeignModelEventArgs.LoadForeignTableByKey (foreignKeyModel parameter contains the foreignkey field name, if so then we need to find the model)
+	''' keyType = ForeignModelEventArgs.LoadForeignTableByModel (foreignKeyModel parmeter contains the foreignkey model name)
+	''' </summary>
+	Public Function GetForeignListAsync(foreignKeyModel As String, keyType As Integer) As Task(Of IQueryable)
+		Dim includeModel As String = foreignKeyModel
+
+		If keyType = ForeignModelEventArgs.LoadForeignTableByKey AndAlso Not String.IsNullOrEmpty(foreignKeyModel) Then
+			includeModel = FindForeignKeyRelationship(foreignKeyModel)
+		End If
+
+		If Not String.IsNullOrEmpty(includeModel) Then
+			Dim inModel As Type = Type.[GetType](includeModel)
+
+			If inModel IsNot Nothing Then
+				Dim fset As DbSet = dbrepContext.[Set](inModel)
+				Await fset.LoadAsync()
+				Return fset.Local.AsQueryable()
+			End If
+		End If
+
+		Return Nothing
+	End Function
+
+	''' <summary>
+	''' Looks through the entity framework to retreive the model name for the foreign key table based on a foreign key field name
+	''' Normally only used on filter fields
+	''' </summary>
+	Private Function FindForeignKeyRelationship(foreignKey As String) As String
+		' Load EF metadata
+		Dim metadata = DirectCast(dbrepContext, IObjectContextAdapter).ObjectContext.MetadataWorkspace
+		Dim objectItemCollection = DirectCast(metadata.GetItemCollection(DataSpace.OSpace), ObjectItemCollection)
+
+		' Find only objects from the current model <TEntity>
+		Dim entityType = metadata.GetItems(Of EntityType)(DataSpace.OSpace).[Single](Function(e) objectItemCollection.GetClrType(e) = GetType(TEntity))
+
+		' Find the foreignkey constaint which matches the filter field 
+		Dim association = metadata.GetItems(Of AssociationType)(DataSpace.SSpace).Where(Function(a) a.ReferentialConstraints.Any(Function(o) o.ToProperties.Any(Function(x) x.Name = foreignKey)))
+
+		' Match the filter field foreign key to the database model
+		Dim navProp = entityType.Members.OfType(Of NavigationProperty)().Where(Function(a) association.Any(Function(o) o.Name = a.RelationshipType.Name)).SingleOrDefault()
+
+		If navProp IsNot Nothing Then
+			' Return the name of the model
+			Return navProp.TypeUsage.EdmType.FullName
+		End If
+
+		Return ""
+	End Function
+
+	''' <summary>
+	''' Async inserts a record into the database using model binding
+	''' </summary>
+	Public Function InsertItemAsync(modelMethodContext As ModelMethodContext) As Task(Of Integer)
+		Dim ret As Integer = 0
+		Dim item = Me.dbrepSet.Create()
+		modelMethodContext.TryUpdateModel(item)
+
+		If modelMethodContext.ModelState.IsValid Then
+			Me.dbrepSet.Add(item)
+
+			Try
+				ret = Await dbrepContext.SaveChangesAsync().ConfigureAwait(False)
+			Catch ex As DbUpdateException
+				modelMethodContext.ModelState.AddModelError("InsertError", ex.InnerException.InnerException.Message)
+				ret = 0
+			End Try
+
+			Return ret
+		End If
+
+		Return 0
+	End Function
+
+	''' <summary>
+	''' Async updates a record in the database using model binding
+	''' </summary>
+	Public Function UpdateItemAsync(id As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer)
+		Dim ret As Integer
+		Dim item = Me.dbrepSet.Find(id)
+		If item Is Nothing Then
+			modelMethodContext.ModelState.AddModelError("idNotFound", [String].Format("Item with id {0} was not found", If(id Is Nothing, "null", id.ToString())))
+			Return 0
+		End If
+
+		modelMethodContext.TryUpdateModel(item)
+		If modelMethodContext.ModelState.IsValid Then
+			Try
+				ret = Await dbrepContext.SaveChangesAsync().ConfigureAwait(False)
+			Catch ex As DbUpdateException
+				modelMethodContext.ModelState.AddModelError("UpdateError", ex.InnerException.InnerException.Message)
+				ret = 0
+			End Try
+
+			Return ret
+		End If
+
+		Return 0
+	End Function
+
+	''' <summary>
+	''' Async deletes a record from the database
+	''' </summary>
+	Public Function DeleteItemAsync(id As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer)
+		Dim item = Me.dbrepSet.Find(id)
+		If item IsNot Nothing Then
+			Me.dbrepSet.Remove(item)
+			Return Await dbrepContext.SaveChangesAsync().ConfigureAwait(False)
+		Else
+			modelMethodContext.ModelState.AddModelError("idNotFound", [String].Format("A Item with id {0} was not found", If(id Is Nothing, "null", id.ToString())))
+		End If
+
+		Return 0
+	End Function
+
+End Namespace

@@ -1,10 +1,46 @@
 ﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
 <#@ include file="Imports.include.t4" #>
-Imports Microsoft.AspNet.FriendlyUrls.ModelBinding
+Imports <#= DefaultNamespace #>.Extenders;
+Imports <#= DefaultNamespace #>.Repositories;
+Imports <#= DefaultNamespace #>.FieldTemplates;
+Imports ScaffoldFilter;
 
 Public Partial Class <#=CodeBesideName#>
 	Inherits System.Web.UI.Page
+
+	Private _repository As New <#=ModelName#>Repository(Of <#=FullModelName#>, System.Nullable(Of <#=PrimaryKeyType#>))()
+
+	Protected Sub Page_Init()
+		fv<#=ModelName#>.SetDataMethodsObject(_repository)
+		fv<#=ModelName#>.RedirectToRouteOnItemCommand("~/Maintain/vCourse/Default")
+		fv<#=ModelName#>.RedirectToRouteOnItemUpdated("~/Maintain/vCourse/Default")
+	End Sub
+
+	Public Sub ForeignKeyEventHandler_LoadForeignKey(e As ForeignModelEventArgs)
+		e.returnResults = _repository.GetForeignList(e.foreignKeyModel, e.keyType)
+	End Sub
+
+	Protected Sub dcForeignKey_Load(sender As Object, e As EventArgs)
+		Dim dc As System.Web.DynamicData.DynamicControl = DirectCast(sender, System.Web.DynamicData.DynamicControl)
+		Dim fkef As ForeignKey_EditField = DirectCast(dc.FieldTemplate, ForeignKey_EditField)
+
+		If fkef IsNot Nothing Then
+			fkef.ForeignKey += New ForeignKeyEventHandler(AddressOf ForeignKeyEventHandler_LoadForeignKey)
+		End If
+	End Sub
+End Class
+
+
+
+
+
+
+
+
+
+
+
 
 	Protected _db As New <#=DbContextTypeName#>()
 

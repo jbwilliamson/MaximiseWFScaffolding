@@ -18,12 +18,11 @@
 Option Strict Off
 Option Explicit On
 
-
-
-Partial Public Class EmailAddressField
-    
-    Protected HyperLink1 As Global.System.Web.UI.WebControls.HyperLink
-End Class
+Namespace <#= DefaultNamespace #>.FieldTemplates
+	Partial Public Class EmailAddressField
+		Protected HyperLink1 As Global.System.Web.UI.WebControls.HyperLink
+	End Class
+End Namespace
 
 
 

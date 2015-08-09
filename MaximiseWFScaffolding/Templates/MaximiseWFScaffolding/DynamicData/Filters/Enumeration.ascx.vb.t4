@@ -1,0 +1,48 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+Imports System.Collections
+Imports System.Collections.Generic
+Imports System.Collections.Specialized
+Imports System.Web.DynamicData
+Imports System.Web
+Imports System.Web.UI
+Imports System.Web.UI.WebControls
+Imports ScaffoldFilter
+
+Namespace <#= DefaultNamespace #>.Filters
+	Public Partial Class EnumerationFilter
+		Inherits ScaffoldFilter.ScaffoldFilterUserControl
+		Public Overrides ReadOnly Property FilterControl() As Control
+			Get
+				Return SFFilter_DropDownList1
+			End Get
+		End Property
+
+		Public Sub Page_Init(sender As Object, e As EventArgs)
+			If Not Page.IsPostBack Then
+				PopulateListControl(SFFilter_DropDownList1)
+
+				Dim defaultValue As String = ""
+				Dim flea As New FilterLoadEventArgs()
+				flea.FilterDefaults = Nothing
+				Me.OnFilterLoad(flea)
+
+				If flea.FilterDefaults IsNot Nothing Then
+					flea.FilterDefaults.TryGetValue(Column.FieldName, defaultValue)
+					If defaultValue IsNot Nothing Then
+						SFFilter_DropDownList1.SelectedValue = defaultValue
+					End If
+				End If
+			End If
+		End Sub
+
+		Protected Sub SFFilter_DropDownList1_SelectedIndexChanged(sender As Object, e As EventArgs)
+			OnFilterChanged(SFFilter_DropDownList1.SelectedValue, Column.FieldName)
+		End Sub
+	End Class
+End Namespace

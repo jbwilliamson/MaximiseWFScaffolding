@@ -97,9 +97,9 @@ namespace RandomSchool.Repositories
         }
 
 		/// <summary>
-        /// Generic function to retrieve a foreignkey table, returns an IQueryable of unknow type
+        /// Generic function to retrieve a foreignkey table, returns an IQueryable of unknown type
         /// keyType = ForeignModelEventArgs.LoadForeignTableByKey (foreignKeyModel parameter contains the foreignkey field name, if so then we need to find the model)
-        /// keyType = ForeignModelEventArgs.LoadForeignTableByModel (foreignKeyModel parmeter contains the foreignkey model name)
+        /// keyType = ForeignModelEventArgs.LoadForeignTableByModel (foreignKeyModel parameter contains the foreignkey model name)
         /// </summary>
 		public IQueryable GetForeignList(string foreignKeyModel, int keyType)
         {
@@ -155,7 +155,7 @@ namespace RandomSchool.Repositories
         }
 
 		/// <summary>
-        /// Looks through the entity framework to retreive the model name for the foreign key table based on a foreign key field name
+        /// Looks through the entity framework to retrieve the model name for the foreign key table based on a foreign key field name
         /// Normally only used on filter fields
         /// </summary>
         private string FindForeignKeyRelationship(string foreignKey)
@@ -169,7 +169,7 @@ namespace RandomSchool.Repositories
                 .GetItems<EntityType>(DataSpace.OSpace)
                 .Single(e => objectItemCollection.GetClrType(e) == typeof(TEntity));
 
-            // Find the foreignkey constaint which matches the filter field 
+            // Find the foreignkey constraint which matches the filter field 
             var association = metadata
                 .GetItems<AssociationType>(DataSpace.SSpace)
                 .Where(a => a.ReferentialConstraints.Any(o => o.ToProperties.Any(x => x.Name == foreignKey)));

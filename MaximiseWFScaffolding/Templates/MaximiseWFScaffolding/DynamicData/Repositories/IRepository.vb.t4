@@ -1,0 +1,24 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+Imports System.Collections.Generic
+Imports System.Linq
+Imports System.Web.UI.WebControls
+
+Namespace <#= DefaultNamespace #>.Repositories
+	Public Interface IRepository(Of TEntity As Class, TKey)
+		Function GetItem(id As TKey) As TEntity
+		Function GetModelData(includeModel As String(), filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
+		Function GetModelData(filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
+
+		Function GetForeignList(foreignKeyModel As String, keyType As Integer) As IQueryable
+
+		Function InsertItem(modelMethodContext As ModelMethodContext) As Integer
+		Function UpdateItemBase(id As TKey, modelMethodContext As ModelMethodContext) As Integer
+		Function DeleteItemBase(id As TKey, modelMethodContext As ModelMethodContext) As Integer
+	End Interface
+End Namespace

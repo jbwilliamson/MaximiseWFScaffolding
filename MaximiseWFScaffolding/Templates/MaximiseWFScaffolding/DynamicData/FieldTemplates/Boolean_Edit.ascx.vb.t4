@@ -9,31 +9,47 @@ Imports System.ComponentModel.DataAnnotations
 Imports System.Web.DynamicData
 Imports System.Web
 
-Class Boolean_EditField
-    Inherits FieldTemplateUserControl
+Namespace <#= DefaultNamespace #>.FieldTemplates
+	Class Boolean_EditField
+		Inherits FieldTemplateUserControl
 
-	Protected Sub Page_Init(sender As Object, e As EventArgs)
-        CheckBox1.ToolTip = Column.Description
-		Label1.Text = Column.DisplayName
-	End Sub
+		Public Property SetFocus() As String
+			Get
+				Return m_SetFocus
+			End Get
+			Set
+				m_SetFocus = Value
+			End Set
+		End Property
+		Private m_SetFocus As String
 
-    Protected Overrides Sub OnDataBinding(ByVal e As EventArgs)
-        MyBase.OnDataBinding(e)
-        Dim val As Object = FieldValue
-        If val IsNot Nothing Then
-            CheckBox1.Checked = CType(val, Boolean)
-        End If
-    End Sub
-    
-    Protected Overrides Sub ExtractValues(ByVal dictionary As IOrderedDictionary)
-        dictionary(Column.Name) = CheckBox1.Checked
-    End Sub
+		Protected Sub Page_Init(sender As Object, e As EventArgs)
+			If Not IsPostBack Then
+				CheckBox1.ToolTip = Column.Description
+				Label1.Text = Column.DisplayName + " :"
 
-    Public Overrides ReadOnly Property DataControl As Control
-        Get
-            Return CheckBox1
-        End Get
-    End Property
+				If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
+					CheckBox1.Attributes.Add("autofocus", "autofocus")
+				End If
+			End If
+		End Sub
+
+		Protected Overrides Sub OnDataBinding(ByVal e As EventArgs)
+			MyBase.OnDataBinding(e)
+			Dim val As Object = FieldValue
+			If val IsNot Nothing Then
+				CheckBox1.Checked = CType(val, Boolean)
+			End If
+		End Sub
     
-    
-End Class
+		Protected Overrides Sub ExtractValues(ByVal dictionary As IOrderedDictionary)
+			dictionary(Column.Name) = CheckBox1.Checked
+		End Sub
+
+		Public Overrides ReadOnly Property DataControl As Control
+			Get
+				Return CheckBox1
+			End Get
+		End Property
+	End Class
+End Namespace

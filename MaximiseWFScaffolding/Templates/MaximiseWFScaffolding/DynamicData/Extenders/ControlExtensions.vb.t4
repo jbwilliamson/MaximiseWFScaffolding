@@ -1,0 +1,102 @@
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="cs" #>
+<#@ assembly name="System.Core" #>
+<#@ Template Language="C#" HostSpecific="True"  #>
+<#@ Output Extension="vb" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter type="System.String" name="DefaultNamespace" #>
+Imports System.ComponentModel.DataAnnotations
+Imports System.Web.DynamicData
+Imports System.Web
+Imports System.Linq
+Imports System.Linq.Expressions
+Imports System.Reflection
+
+Namespace <#= DefaultNamespace #>.Extenders
+
+	Public NotInheritable Class ControlExtensions
+		Private Sub New()
+		End Sub
+		<System.Runtime.CompilerServices.Extension> _
+		Public Shared Sub SetDataMethodsObject(dataControl As DataBoundControl, dataMethodObject As Object)
+			dataControl.CallingDataMethods += Function(s, e) InlineAssignHelper(e.DataMethodsObject, dataMethodObject)
+		End Sub
+
+		<System.Runtime.CompilerServices.Extension> _
+		Public Shared Sub RedirectToRouteOnItemInserted(formView As FormView, routeName As String)
+			formView.ItemInserted += Function(s, e) 
+				If formView.Page.ModelState.IsValid Then
+					formView.Page.Response.Redirect(routeName)
+				End
+			End Function
+		End Sub
+
+		<System.Runtime.CompilerServices.Extension> _
+		Public Shared Sub RedirectToRouteOnItemDeleted(formView As FormView, routeName As String)
+			formView.ItemDeleted += Function(s, e) 
+				If formView.Page.ModelState.IsValid Then
+					formView.Page.Response.Redirect(routeName)
+				End If
+			End Function
+		End Sub
+
+		<System.Runtime.CompilerServices.Extension> _
+		Public Shared Sub RedirectToRouteOnItemCommand(formView As FormView, routeName As String)
+			formView.ItemCommand += Function(s, e) 
+				If e.CommandName.Equals("Cancel") Then
+					formView.Page.Response.Redirect(routeName)
+				End If
+			End Function
+		End Sub
+
+		<System.Runtime.CompilerServices.Extension> _
+		Public Shared Sub RedirectToRouteOnItemUpdated(formView As FormView, routeName As String)
+			formView.ItemUpdated += Function(s, e) 
+				If formView.Page.ModelState.IsValid Then
+					formView.Page.Response.Redirect(routeName)
+				End If
+			End Function
+		End Sub
+
+		Private Shared Function InlineAssignHelper(Of T)(ByRef target As T, value As T) As T
+			target = value
+			Return value
+		End Function
+	End Class
+
+	<System.Runtime.CompilerServices.Extension> _
+	Public Shared Function OrderBy(Of T)(source As IQueryable(Of T), [property] As String) As IOrderedQueryable(Of T)
+		Return ApplyOrder(Of T)(source, [property], "OrderBy")
+	End Function
+	<System.Runtime.CompilerServices.Extension> _
+	Public Shared Function OrderByDescending(Of T)(source As IQueryable(Of T), [property] As String) As IOrderedQueryable(Of T)
+		Return ApplyOrder(Of T)(source, [property], "OrderByDescending")
+	End Function
+	<System.Runtime.CompilerServices.Extension> _
+	Public Shared Function ThenBy(Of T)(source As IOrderedQueryable(Of T), [property] As String) As IOrderedQueryable(Of T)
+		Return ApplyOrder(Of T)(source, [property], "ThenBy")
+	End Function
+	<System.Runtime.CompilerServices.Extension> _
+	Public Shared Function ThenByDescending(Of T)(source As IOrderedQueryable(Of T), [property] As String) As IOrderedQueryable(Of T)
+		Return ApplyOrder(Of T)(source, [property], "ThenByDescending")
+	End Function
+	Private Shared Function ApplyOrder(Of T)(source As IQueryable(Of T), [property] As String, methodName As String) As IOrderedQueryable(Of T)
+		Dim props As String() = [property].Split("."C)
+		Dim type As Type = GetType(T)
+		Dim arg As ParameterExpression = Expression.Parameter(type, "x")
+		Dim expr As Expression = arg
+		For Each prop As String In props
+			Dim pi As PropertyInfo = type.GetProperty(prop)
+			expr = Expression.[Property](expr, pi)
+			type = pi.PropertyType
+		Next
+		Dim delegateType As Type = GetType(Func(Of , )).MakeGenericType(GetType(T), type)
+		Dim lambda As LambdaExpression = Expression.Lambda(delegateType, expr, arg)
+
+		Dim result As Object = GetType(Queryable).GetMethods().[Single](Function(method) method.Name = methodName AndAlso method.IsGenericMethodDefinition AndAlso method.GetGenericArguments().Length = 2 AndAlso method.GetParameters().Length = 2).MakeGenericMethod(GetType(T), type).Invoke(Nothing, New Object() {source, lambda})
+		Return DirectCast(result, IOrderedQueryable(Of T))
+	End Function
+End Namespace

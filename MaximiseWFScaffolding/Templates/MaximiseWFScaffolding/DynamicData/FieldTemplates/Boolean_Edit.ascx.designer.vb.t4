@@ -14,11 +14,8 @@
 '     the code is regenerated.
 ' </auto-generated>
 '------------------------------------------------------------------------------
-
 Option Strict Off
 Option Explicit On
-
-
 
 Partial Public Class Boolean_EditField
     Protected Div1 As Global.System.Web.UI.HtmlControls.HtmlGenericControl

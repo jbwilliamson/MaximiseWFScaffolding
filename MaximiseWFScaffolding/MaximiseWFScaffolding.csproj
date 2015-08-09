@@ -87,7 +87,13 @@
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Extenders\ControlExtensions.cs.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Extenders\ControlExtensions.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Extenders\ValidationConstants.cs.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Extenders\ValidationConstants.vb.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Boolean.ascx.designer.vb.t4">
@@ -143,6 +149,9 @@
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Date.cs.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Date_Edit.ascx.designer.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Date_Edit.cs.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -171,6 +180,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Date_Edit.ascx.designer.cs.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Date_Edit.vb.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Decimal_Edit.ascx.designer.vb.t4">
@@ -306,6 +318,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Text.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Date_Edit.ascx.vb.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\FieldTemplates\Text_Edit.ascx.designer.vb.t4">
@@ -479,16 +494,49 @@
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\Enumeration.ascx.designer.cs.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\Enumeration.ascx.designer.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\Enumeration.ascx.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\Enumeration.cs.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\ForeignKey.ascx.cs.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\ForeignKey.ascx.designer.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\ForeignKey.cs.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\ForeignKey.ascx.designer.cs.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\Enumeration.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\ForeignKey.ascx.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Filters\ForeignKey.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\ClassRepository.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\ClassRepositoryAsync.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\IRepository.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\IRepositoryAsync.vb.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\RepositoryAsyncBase.vb.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\RepositoryBase.cs.t4">
@@ -501,6 +549,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\RepositoryAsyncBase.cs.t4">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Templates\MaximiseWFScaffolding\DynamicData\Repositories\RepositoryBase.vb.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Templates\MaximiseWFScaffolding\DynamicData\UserTemplates\LabelControl.ascx.cs.t4">
