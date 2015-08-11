@@ -1,74 +1,48 @@
 ﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
 <#@ include file="Imports.include.t4" #><##>
-
-Imports <#= DefaultNamespace #>.Extenders;
-Imports <#= DefaultNamespace #>.Repositories;
-Imports <#= DefaultNamespace #>.FieldTemplates;
-Imports ScaffoldFilter;
+<#if(IsAsyncRepository) {#>
+Imports System.Threading.Tasks
+<#}#>
+Imports <#= DefaultNamespace #>.Extenders
+Imports <#= DefaultNamespace #>.Repositories
+Imports ScaffoldFilter
 
 Public Partial Class <#=CodeBesideName#>
 	Inherits System.Web.UI.Page
-
-	Private _repository As New <#=ModelName#>Repository(Of <#=FullModelName#>, System.Nullable(Of <#=PrimaryKeyType#>))()
+<#if(IsAsyncRepository) {#>
+	Private _repository As New <#=ModelName #>RepositoryAsync(Of <#=FullModelName#>, <#=PrimaryKeyType#>)()
+<#} else {#>
+	Private _repository As New <#=ModelName #>Repository(Of <#=FullModelName#>, <#=PrimaryKeyType#>)()
+<#}#>
 
 	Protected Sub Page_Init()
-		fvCourse.SetDataMethodsObject(_repository)
-		fvCourse.RedirectToRouteOnItemInserted("~/<#=RelativePath#>/Default")
-		fvCourse.RedirectToRouteOnItemCommand("~/<#=RelativePath#>/Default")
+		fv<#=ModelName #>.SetDataMethodsObject(_repository)
+		fv<#=ModelName #>.RedirectToRouteOnItemInserted("~/<#=RelativePath#>/Default")
+		fv<#=ModelName #>.RedirectToRouteOnItemCommand("~/<#=RelativePath#>/Default")
 	End Sub
 
+<#if(IsAsyncRepository) {#>
+	Public Function ForeignKeyEventHandler_LoadForeignKey(e As ForeignModelEventArgs) As Task
+		e.returnResults = Await _repository.GetForeignListAsync(e.foreignKeyModel, e.keyType)
+	End Function
+<#} else {#>
 	Public Sub ForeignKeyEventHandler_LoadForeignKey(e As ForeignModelEventArgs)
 		e.returnResults = _repository.GetForeignList(e.foreignKeyModel, e.keyType)
 	End Sub
+<#}#>
 
 	Protected Sub dcForeignKey_Load(sender As Object, e As EventArgs)
 		Dim dc As System.Web.DynamicData.DynamicControl = DirectCast(sender, System.Web.DynamicData.DynamicControl)
 		Dim fkef As ForeignKey_EditField = DirectCast(dc.FieldTemplate, ForeignKey_EditField)
 
 		If fkef IsNot Nothing Then
-			fkef.ForeignKey += New ForeignKeyEventHandler(AddressOf ForeignKeyEventHandler_LoadForeignKey)
-		End If
-	End Sub
-End Class	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	Protected _db As New <#=DbContextTypeName#>()
-
-	Protected Sub Page_Load(sender As Object, e As EventArgs)
-
-	End Sub
-
-	' This is the Insert method to insert the entered <#=ModelName#> item
-	' USAGE: <asp:FormView InsertMethod="InsertItem">
-	Public Sub InsertItem()
-		Using _db
-			Dim item = New <#=FullModelName#>()
-
-			TryUpdateModel(item)
-
-			If ModelState.IsValid Then
-				' Save changes
-				_db.<#=PluralizedModelName#>.Add(item)
-				_db.SaveChanges()
-
-				Response.Redirect("Default")
-			End If
-		End Using
-	End Sub
-
-	Protected Sub ItemCommand(sender As Object, e As FormViewCommandEventArgs)
-		If e.CommandName.Equals("Cancel", StringComparison.OrdinalIgnoreCase) Then
-			Response.Redirect("Default")
+<#if(IsAsyncRepository) {#>
+			AddHandler fkef.ForeignKey, New AsyncForeignKeyEventHandler(AddressOf ForeignKeyEventHandler_LoadForeignKey)
+<#} else {#>
+			AddHandler fkef.ForeignKey, New ForeignKeyEventHandler(AddressOf ForeignKeyEventHandler_LoadForeignKey)
+<#}#>
 		End If
 	End Sub
 End Class
+

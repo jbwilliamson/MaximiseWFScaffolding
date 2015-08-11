@@ -4,7 +4,7 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
-<#@ parameter type="System.String" name="DefaultNamespace" #>
+<#@ include file="../../WebForms/Imports.include.t4" #><##>
 Imports System.Collections
 Imports System.Collections.Generic
 Imports System.Collections.Specialized
@@ -17,61 +17,38 @@ Imports System.Threading.Tasks
 <#}#>
 Imports ScaffoldFilter
 
-Namespace <#= DefaultNamespace #>.Filters
-
-	Public Partial Class ForeignKeyFilter
-		Inherits ScaffoldFilter.ScaffoldFilterUserControl
+Public Partial Class ForeignKeyFilter
+	Inherits ScaffoldFilter.ScaffoldFilterUserControl
 
 <#if(IsAsyncRepository) {#>
-		Public Event ForeignKey As AsyncForeignKeyEventHandler
+	Public Event ForeignKey As AsyncForeignKeyEventHandler
 <#} else {#>
-		Public Event ForeignKey As ForeignKeyEventHandler 
+	Public Event ForeignKey As ForeignKeyEventHandler 
 <#}#>
 
-		Public Overrides ReadOnly Property FilterControl() As Control
-			Get
-				Return Me.SFFilter_DropDownList1
-			End Get
-		End Property
+	Public Overrides ReadOnly Property FilterControl() As Control
+		Get
+			Return Me.SFFilter_DropDownList1
+		End Get
+	End Property
 
-		Protected Sub SFFilter_DropDownList1_SelectedIndexChanged(sender As Object, e As EventArgs)
-			Me.OnFilterChanged(SFFilter_DropDownList1.SelectedValue, Column.FieldName)
-		End Sub
+	Protected Sub SFFilter_DropDownList1_SelectedIndexChanged(sender As Object, e As EventArgs)
+		Me.OnFilterChanged(SFFilter_DropDownList1.SelectedValue, Column.FieldName)
+	End Sub
 
-		Protected Sub SFFilter_DropDownList1_Load(sender As Object, e As EventArgs)
-			If Not IsPostBack Then
-				Dim fmea As New ForeignModelEventArgs()
-				fmea.returnResults = Nothing
-				fmea.foreignKeyModel = Column.FieldName
-				fmea.keyType = ForeignModelEventArgs.LoadForeignTableByKey
+	Protected Sub SFFilter_DropDownList1_Load(sender As Object, e As EventArgs)
+		If Not IsPostBack Then
+			Dim fmea As New ForeignModelEventArgs()
+			fmea.returnResults = Nothing
+			fmea.foreignKeyModel = Column.FieldName
+			fmea.keyType = ForeignModelEventArgs.LoadForeignTableByKey
 
 <#if(IsAsyncRepository) {#>
-				Me.Page.RegisterAsyncTask(New PageAsyncTask(Function() 
-					If Me.ForeignKey IsNot Nothing Then
-						SFFilter_DropDownList1.Items.Clear()
-						SFFilter_DropDownList1.Items.Add(New ListItem("All", ""))
-						Await Me.ForeignKey(fmea)
-						PopulateListControl(SFFilter_DropDownList1, fmea.returnResults, Column.ForeignField)
-
-						Dim defaultValue As String = ""
-						Dim flea As New FilterLoadEventArgs()
-						flea.FilterDefaults = Nothing
-						Me.OnFilterLoad(flea)
-
-						SFFilter_DropDownList1.SelectedIndex = 0
-						If flea.FilterDefaults IsNot Nothing Then
-							flea.FilterDefaults.TryGetValue(Column.FieldName, defaultValue)
-							If defaultValue IsNot Nothing Then
-								SFFilter_DropDownList1.SelectedValue = defaultValue
-							End If
-						End If
-					End If
-				End Function))
-<#}else {#>
-				If Me.ForeignKey IsNot Nothing Then
+			Me.Page.RegisterAsyncTask(New PageAsyncTask(Function() 
+				If Me.ForeignKeyEvent IsNot Nothing Then
 					SFFilter_DropDownList1.Items.Clear()
 					SFFilter_DropDownList1.Items.Add(New ListItem("All", ""))
-					Me.ForeignKey(fmea)
+					Await RaiseEvent ForeignKey(fmea)
 					PopulateListControl(SFFilter_DropDownList1, fmea.returnResults, Column.ForeignField)
 
 					Dim defaultValue As String = ""
@@ -86,9 +63,29 @@ Namespace <#= DefaultNamespace #>.Filters
 							SFFilter_DropDownList1.SelectedValue = defaultValue
 						End If
 					End If
-<#}#>
 				End If
+			End Function))
+<#}else {#>
+			If Me.ForeignKeyEvent IsNot Nothing Then
+				SFFilter_DropDownList1.Items.Clear()
+				SFFilter_DropDownList1.Items.Add(New ListItem("All", ""))
+				RaiseEvent ForeignKey(fmea)
+				PopulateListControl(SFFilter_DropDownList1, fmea.returnResults, Column.ForeignField)
+
+				Dim defaultValue As String = ""
+				Dim flea As New FilterLoadEventArgs()
+				flea.FilterDefaults = Nothing
+				Me.OnFilterLoad(flea)
+
+				SFFilter_DropDownList1.SelectedIndex = 0
+				If flea.FilterDefaults IsNot Nothing Then
+					flea.FilterDefaults.TryGetValue(Column.FieldName, defaultValue)
+					If defaultValue IsNot Nothing Then
+						SFFilter_DropDownList1.SelectedValue = defaultValue
+					End If
+				End If
+<#}#>
 			End If
-		End Sub
-	End Class
-End Namespace
+		End If
+	End Sub
+End Class

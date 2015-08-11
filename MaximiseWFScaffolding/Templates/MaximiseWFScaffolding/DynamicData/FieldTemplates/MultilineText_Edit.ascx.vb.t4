@@ -1,4 +1,4 @@
-<#@ Template Language="C#" HostSpecific="True"  #>
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
@@ -6,69 +6,67 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
 <#@ parameter type="System.String" name="ClientSideValidation" #>
-using <#= DefaultNamespace #>.Extenders;
+Imports System.ComponentModel.DataAnnotations
+Imports <#= DefaultNamespace #>.Extenders
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class MultilineText_EditField
-		Inherits System.Web.DynamicData.FieldTemplateUserControl
+Public Partial Class MultilineText_EditField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
 
-		Public Property SetFocus() As String
-			Get
-				Return m_SetFocus
-			End Get
-			Set
-				m_SetFocus = Value
-			End Set
-		End Property
-		Private m_SetFocus As String
+	Public Property SetFocus() As String
+		Get
+			Return m_SetFocus
+		End Get
+		Set
+			m_SetFocus = Value
+		End Set
+	End Property
+	Private m_SetFocus As String
 
-		Protected Sub Page_Init(sender As Object, e As EventArgs)
-			If Not IsPostBack Then
-				TextBox1.ToolTip = Column.Description
-				Label1.Text = Column.DisplayName + " :"
+	Protected Sub Page_Init(sender As Object, e As EventArgs)
+		If Not IsPostBack Then
+			TextBox1.ToolTip = Column.Description
+			Label1.Text = Column.DisplayName + " :"
 
-				If Column.Prompt IsNot Nothing AndAlso Column.Prompt.Length > 0 Then
-					TextBox1.Attributes.Add("placeholder", Column.Prompt)
-				End If
-
-				If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
-					TextBox1.Attributes.Add("autofocus", "autofocus")
-				End If
-
-
-				If Column.IsRequired Then
-
-					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-					TextBox1.Attributes.Add("data-val-clear", "")
-					TextBox1.Attributes.Add("required", "required")
-
-					TextBox1.Attributes.Add("oninvalid", "setCustomValidity(this.dataset.valRequired);")
-					TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.value.length > 0 ? this.dataset.valClear : this.dataset.valRequired);")
-
-					TextBox1.Attributes.Add("data-val", "true")
-
-					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-
-				End If
+			If Column.Prompt IsNot Nothing AndAlso Column.Prompt.Length > 0 Then
+				TextBox1.Attributes.Add("placeholder", Column.Prompt)
 			End If
-		End Sub
 
-		' show bootstrap has-error
-		Protected Sub Page_PreRender(sender As Object, e As EventArgs)
-			' if validation error then apply bootstrap has-error CSS class
-			Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
-			Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+			If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
+				TextBox1.Attributes.Add("autofocus", "autofocus")
+			End If
 
-		End Sub
+<#if (ClientSideValidation != "None") {#>
+			If Column.IsRequired Then
+<#if (ClientSideValidation == "HTML5") {#>
+				TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+				TextBox1.Attributes.Add("data-val-clear", "")
+				TextBox1.Attributes.Add("required", "required")
 
-		Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
-			dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
-		End Sub
+				TextBox1.Attributes.Add("oninvalid", "setCustomValidity(this.dataset.valRequired);")
+				TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.value.length > 0 ? this.dataset.valClear : this.dataset.valRequired);")
+<#} else {#>
+				TextBox1.Attributes.Add("data-val", "true")
+				TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+<#}#>
+			End If
+<#}#>
+		End If
+	End Sub
 
-		Public Overrides ReadOnly Property DataControl() As Control
-			Get
-				Return TextBox1
-			End Get
-		End Property
-	End Class
-End Namespace
+	' show bootstrap has-error
+	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+		' if validation error then apply bootstrap has-error CSS class
+		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+	End Sub
+
+	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+		dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
+	End Sub
+
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return TextBox1
+		End Get
+	End Property
+End Class

@@ -14,7 +14,6 @@
 '     the code is regenerated.
 ' </auto-generated>
 '------------------------------------------------------------------------------
-
 Public Partial Class <#=CodeBesideName#>
 	''' <summary>
 	''' form1 control.
@@ -23,6 +22,7 @@ Public Partial Class <#=CodeBesideName#>
 	''' Auto-generated field.
 	''' To modify move field declaration from designer file to code-behind file.
 	''' </remarks>
-	Protected form1 As Global.System.Web.UI.HtmlControls.HtmlForm
+	Protected WithEvents fv<#= ModelName #> As Global.System.Web.UI.WebControls.FormView
 End Class
+
 

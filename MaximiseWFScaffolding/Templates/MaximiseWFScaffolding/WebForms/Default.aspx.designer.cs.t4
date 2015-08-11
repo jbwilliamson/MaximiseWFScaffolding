@@ -26,6 +26,9 @@ namespace <#= FolderNamespace #> {
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 		protected global::System.Web.UI.WebControls.ListView lv<#= ModelName #>;
+		protected global::System.Web.UI.WebControls.DataPager dp<#= ModelName #>;
+<#if (FilterOnModel == true) {#>
 		protected global::ScaffoldFilter.ScaffoldingFilterRepeater FilterRepeater;
+<#}#>
     }
 }

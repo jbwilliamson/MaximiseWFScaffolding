@@ -1,10 +1,6 @@
 ﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
-<#@ assembly name="System.Core" #>
-<#@ import namespace="System.Linq" #>
-<#@ import namespace="System.Text" #>
-<#@ import namespace="System.Collections.Generic" #>
-<#@ parameter type="System.String" name="DefaultNamespace" #>
+<#@ include file="../../WebForms/Imports.include.t4" #><##>
 Imports System.Collections.Generic
 Imports System.Linq
 Imports System.Linq.Expressions
@@ -14,230 +10,247 @@ Imports System.Data.Entity.Infrastructure
 Imports System.Data.Entity.Core.Metadata.Edm
 Imports System.ComponentModel
 Imports System.Reflection
-
 Imports Microsoft.AspNet.FriendlyUrls.ModelBinding
 Imports ScaffoldFilter
 Imports <#= DefaultNamespace #>.Extenders
 
-Namespace <#= DefaultNamespace #>.Repositories
-
+Namespace Repositories
 	Public Class RepositoryBase(Of TEntity As Class, TKey)
 		Implements IRepository(Of TEntity, TKey)
 		
-		Private ReadOnly dbrepContext As <#= DbContextTypeName #> = New <#= DbContextTypeName #>()
+		Private ReadOnly dbrepContext = New <#= DbContextTypeName #>()
 		Private ReadOnly dbrepSet As DbSet(Of TEntity)
 
 		Public Sub New()
 			Me.dbrepSet = dbrepContext.[Set](Of TEntity)()
 		End Sub
-	End Class
+	
+		' <summary>
+		' Load the default list of items from the database, which may include one or more filter options
+		' May include any foreign key tables for TEntity model
+		' Can be sorted directed from the listview with optional sortByExpression
+		' Returns an IQuerybale list of TEntity which loads directly into the listview
+		' </summary>
+		Public Function GetModelData(includeModel As String(), filterData As String, sortByExpression As String) As IQueryable(Of TEntity) Implements IRepository(Of TEntity, TKey).GetModelData
+			Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
 
-	''' <summary>
-	''' Load the default list of items from the database, which may include one or more filter options
-	''' May include any foreign key tables for TEntity model
-	''' Can be sorted directed from the listview with optional sortByExpression
-	''' Returns an IQuerybale list of TEntity which loads directly into the listview
-	''' </summary>
-	Public Function GetModelData(includeModel As String(), filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
-		Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
+			For Each m As String In includeModel
+				If m.Length > 0 Then
+					query = query.Include(m)
+				End If
+			Next
 
-		For Each m As String In includeModel
-			If m.Length > 0 Then
-				query = query.Include(m)
+			If Not String.IsNullOrEmpty(filterData) Then
+				query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable()
 			End If
-		Next
 
-		If Not String.IsNullOrEmpty(filterData) Then
-			query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
-		End If
-
-		If sortByExpression IsNot Nothing Then
-			If sortByExpression.EndsWith(" DESC") Then
-				query = query.OrderByDescending(sortByExpression.Substring(0, sortByExpression.Length - 5))
-			Else
-				query = query.OrderBy(sortByExpression)
+			If sortByExpression IsNot Nothing Then
+				If sortByExpression.EndsWith(" DESC") Then
+					query = query.OrderByDescending(sortByExpression.Substring(0, sortByExpression.Length - 5))
+				Else
+					query = query.OrderBy(sortByExpression)
+				End If
 			End If
-		End If
 
-		Return query
-	End Function
+			Return query
+		End Function
 
-	''' <summary>
-	''' Load the default list of items from the database, which may include one or more filter options
-	''' Can be sorted directed from the listview with optional sortByExpression
-	''' Returns an IQuerybale list of TEntity which loads directly into the listview
-	''' </summary>
-	Public Function GetModelData(filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
-		Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
+		' <summary>
+		' Load the default list of items from the database, which may include one or more filter options
+		' Can be sorted directed from the listview with optional sortByExpression
+		' Returns an IQuerybale list of TEntity which loads directly into the listview
+		' </summary>
+		Public Function GetModelData(filterData As String, sortByExpression As String) As IQueryable(Of TEntity) Implements IRepository(Of TEntity, TKey).GetModelData
+			Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
 
-		If Not String.IsNullOrEmpty(filterData) Then
-			query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
-		End If
-
-		If sortByExpression IsNot Nothing Then
-			If sortByExpression.EndsWith(" DESC") Then
-				query = query.OrderByDescending(sortByExpression.Substring(0, sortByExpression.Length - 5))
-			Else
-				query = query.OrderBy(sortByExpression)
+			If Not String.IsNullOrEmpty(filterData) Then
+				query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable()
 			End If
-		End If
 
-		Return query
-	End Function
+			If sortByExpression IsNot Nothing Then
+				If sortByExpression.EndsWith(" DESC") Then
+					query = query.OrderByDescending(sortByExpression.Substring(0, sortByExpression.Length - 5))
+				Else
+					query = query.OrderBy(sortByExpression)
+				End If
+			End If
 
-	''' <summary>
-	''' Retrieves one item of the TEntity class for edit or display
-	''' </summary>
-	Public Function GetItem(<FriendlyUrlSegmentsAttribute(0)> id As TKey) As TEntity
-		If id Is Nothing Then
+			Return query
+		End Function
+
+		' <summary>
+		' Retrieves one item of the TEntity class for edit or display
+		' </summary>
+		Public Function GetItem(<FriendlyUrlSegmentsAttribute(0)> id As TKey) As TEntity Implements IRepository(Of TEntity, TKey).GetItem
+			If id Is Nothing Then
+				Return Nothing
+			End If
+
+			Return Me.dbrepSet.Find(id)
+		End Function
+
+		' <summary>
+		' Generic function to retrieve a foreignkey table, returns an IQueryable of unknow type
+		' keyType = ForeignModelEventArgs.LoadForeignTableByKey (foreignKeyModel parameter contains the foreignkey field name, if so then we need to find the model)
+		' keyType = ForeignModelEventArgs.LoadForeignTableByModel (foreignKeyModel parmeter contains the foreignkey model name)
+		' </summary>
+		Public Function GetForeignList(foreignKeyModel As String, keyType As Integer) As IQueryable Implements IRepository(Of TEntity, TKey).GetForeignList
+			Dim includeModel As String = foreignKeyModel
+
+			If keyType = ForeignModelEventArgs.LoadForeignTableByKey AndAlso Not String.IsNullOrEmpty(foreignKeyModel) Then
+				includeModel = FindForeignKeyRelationship(foreignKeyModel)
+			End If
+
+			If Not String.IsNullOrEmpty(includeModel) Then
+				Dim inModel As Type = Type.[GetType](includeModel)
+
+				If inModel IsNot Nothing Then
+					Dim fset As DbSet = dbrepContext.[Set](inModel)
+					fset.Load()
+					Return fset.Local.AsQueryable()
+				End If
+			End If
+
 			Return Nothing
-		End If
+		End Function
 
-		Return Me.dbrepSet.Find(id)
-	End Function
+		' <summary>
+		' Function to generate and compile a linq expression, based on the filter parameters passed to 'GetData'
+		' </summary>
+		Private Function FilterOnModel(filterData As String) As Func(Of TEntity, Boolean)
+			Dim filterParameters As String() = filterData.Split(","C)
+			Dim type = GetType(TEntity)
+			Dim pe = Expression.Parameter(type, "p")
+			Dim filterExpression As Expression = Nothing
 
-	''' <summary>
-	''' Generic function to retrieve a foreignkey table, returns an IQueryable of unknow type
-	''' keyType = ForeignModelEventArgs.LoadForeignTableByKey (foreignKeyModel parameter contains the foreignkey field name, if so then we need to find the model)
-	''' keyType = ForeignModelEventArgs.LoadForeignTableByModel (foreignKeyModel parmeter contains the foreignkey model name)
-	''' </summary>
-	Public Function GetForeignList(foreignKeyModel As String, keyType As Integer) As IQueryable
-		Dim includeModel As String = foreignKeyModel
+			For Each parameter As String In filterParameters
+				Dim filterValues As String() = parameter.Split(":"C)
 
-		If keyType = ForeignModelEventArgs.LoadForeignTableByKey AndAlso Not String.IsNullOrEmpty(foreignKeyModel) Then
-			includeModel = FindForeignKeyRelationship(foreignKeyModel)
-		End If
+				Dim modelField As PropertyInfo = type.GetProperties().Where(Function(p) p.Name = filterValues(0)).FirstOrDefault()
+				If modelField IsNot Nothing Then
+					Dim propertyReference = Expression.[Property](pe, filterValues(0))
 
-		If Not String.IsNullOrEmpty(includeModel) Then
-			Dim inModel As Type = Type.[GetType](includeModel)
+					Dim value As Object = TypeDescriptor.GetConverter(modelField.PropertyType).ConvertFromString(filterValues(1))
+					Dim propertyValue = Expression.Constant(value, modelField.PropertyType)
+					Dim compareExp = Expression.Equal(propertyReference, propertyValue)
 
-			If inModel IsNot Nothing Then
-				Dim fset As DbSet = dbrepContext.[Set](inModel)
-				fset.Load()
-				Return fset.Local.AsQueryable()
+					filterExpression = If(filterExpression Is Nothing, compareExp, Expression.[AndAlso](filterExpression, compareExp))
+				End If
+			Next
+
+			Return Expression.Lambda(Of Func(Of TEntity, Boolean))(filterExpression, pe).Compile()
+		End Function
+
+		' <summary>
+		' Looks through the entity framework to retreive the model name for the foreign key table based on a foreign key field name
+		' Normally only used on filter fields
+		' </summary>
+		Private Function FindForeignKeyRelationship(foreignKey As String) As String
+			' Load EF metadata
+			Dim metadata = DirectCast(dbrepContext, IObjectContextAdapter).ObjectContext.MetadataWorkspace
+			Dim objectItemCollection = DirectCast(metadata.GetItemCollection(DataSpace.OSpace), ObjectItemCollection)
+
+			' Find only objects from the current model <TEntity>
+			Dim entityType = metadata.GetItems(Of EntityType)(DataSpace.OSpace).[Single](Function(e) objectItemCollection.GetClrType(e) = GetType(TEntity))
+
+			' Find the foreignkey constaint which matches the filter field 
+			Dim association = metadata.GetItems(Of AssociationType)(DataSpace.SSpace).Where(Function(a) a.ReferentialConstraints.Any(Function(o) o.ToProperties.Any(Function(x) x.Name = foreignKey)))
+
+			' Match the filter field foreign key to the database model
+			Dim navProp = entityType.Members.OfType(Of NavigationProperty)().Where(Function(a) association.Any(Function(o) o.Name = a.RelationshipType.Name)).SingleOrDefault()
+
+			If navProp IsNot Nothing Then
+				' Return the name of the model
+				Return navProp.TypeUsage.EdmType.FullName
 			End If
-		End If
 
-		Return Nothing
-	End Function
+			Return ""
+		End Function
 
-	''' <summary>
-	''' Function to generate and compile a linq expression, based on the filter parameters passed to 'GetData'
-	''' </summary>
-	Private Function FilterOnModel(filterData As String) As Func(Of TEntity, Boolean)
-		Dim filterParameters As String() = filterData.Split(","C)
-		Dim type = GetType(TEntity)
-		Dim pe = Expression.Parameter(type, "p")
-		Dim filterExpression As Expression = Nothing
+		' <summary>
+		' Inserts a record into the database using model binding
+		' </summary>
+		Public Function InsertItem(modelMethodContext As ModelMethodContext) As Integer Implements IRepository(Of TEntity, TKey).InsertItem
+			Dim ret As Integer = 0
+			Dim item = Me.dbrepSet.Create()
+			modelMethodContext.TryUpdateModel(item)
 
-		For Each parameter As String In filterParameters
-			Dim filterValues As String() = parameter.Split(":"C)
+			If modelMethodContext.ModelState.IsValid Then
+				Me.dbrepSet.Add(item)
 
-			Dim modelField As PropertyInfo = type.GetProperties().Where(Function(p) p.Name = filterValues(0)).FirstOrDefault()
-			If modelField IsNot Nothing Then
-				Dim propertyReference = Expression.[Property](pe, filterValues(0))
+				Try
+					ret = dbrepContext.SaveChanges()
+				Catch ex As DbUpdateException
+					modelMethodContext.ModelState.AddModelError("InsertError", ex.InnerException.InnerException.Message)
+					ret = 0
+				End Try
 
-				Dim value As Object = TypeDescriptor.GetConverter(modelField.PropertyType).ConvertFromString(filterValues(1))
-				Dim propertyValue = Expression.Constant(value, modelField.PropertyType)
-				Dim compareExp = Expression.Equal(propertyReference, propertyValue)
-
-				filterExpression = If(filterExpression Is Nothing, compareExp, Expression.[AndAlso](filterExpression, compareExp))
+				Return ret
 			End If
-		Next
 
-		Return Expression.Lambda(Of Func(Of TEntity, Boolean))(filterExpression, pe).Compile()
-	End Function
-
-	''' <summary>
-	''' Looks through the entity framework to retreive the model name for the foreign key table based on a foreign key field name
-	''' Normally only used on filter fields
-	''' </summary>
-	Private Function FindForeignKeyRelationship(foreignKey As String) As String
-		' Load EF metadata
-		Dim metadata = DirectCast(dbrepContext, IObjectContextAdapter).ObjectContext.MetadataWorkspace
-		Dim objectItemCollection = DirectCast(metadata.GetItemCollection(DataSpace.OSpace), ObjectItemCollection)
-
-		' Find only objects from the current model <TEntity>
-		Dim entityType = metadata.GetItems(Of EntityType)(DataSpace.OSpace).[Single](Function(e) objectItemCollection.GetClrType(e) = GetType(TEntity))
-
-		' Find the foreignkey constaint which matches the filter field 
-		Dim association = metadata.GetItems(Of AssociationType)(DataSpace.SSpace).Where(Function(a) a.ReferentialConstraints.Any(Function(o) o.ToProperties.Any(Function(x) x.Name = foreignKey)))
-
-		' Match the filter field foreign key to the database model
-		Dim navProp = entityType.Members.OfType(Of NavigationProperty)().Where(Function(a) association.Any(Function(o) o.Name = a.RelationshipType.Name)).SingleOrDefault()
-
-		If navProp IsNot Nothing Then
-			' Return the name of the model
-			Return navProp.TypeUsage.EdmType.FullName
-		End If
-
-		Return ""
-	End Function
-
-	''' <summary>
-	''' Inserts a record into the database using model binding
-	''' </summary>
-	Public Function InsertItem(modelMethodContext As ModelMethodContext) As Integer
-		Dim ret As Integer = 0
-		Dim item = Me.dbrepSet.Create()
-		modelMethodContext.TryUpdateModel(item)
-
-		If modelMethodContext.ModelState.IsValid Then
-			Me.dbrepSet.Add(item)
-
-			Try
-				ret = dbrepContext.SaveChanges()
-			Catch ex As DbUpdateException
-				modelMethodContext.ModelState.AddModelError("InsertError", ex.InnerException.InnerException.Message)
-				ret = 0
-			End Try
-
-			Return ret
-		End If
-
-		Return 0
-	End Function
-
-	''' <summary>
-	''' Updates a record in the database using model binding
-	''' </summary>
-	Public Function UpdateItemBase(id As TKey, modelMethodContext As ModelMethodContext) As Integer
-		Dim ret As Integer = 0
-		Dim item = Me.dbrepSet.Find(id)
-
-		If item Is Nothing Then
-			modelMethodContext.ModelState.AddModelError("", [String].Format("Item with id {0} was not found", If(id Is Nothing, "null", id.ToString())))
 			Return 0
-		End If
+		End Function
 
-		modelMethodContext.TryUpdateModel(item)
-		If modelMethodContext.ModelState.IsValid Then
-			Try
-				ret = dbrepContext.SaveChanges()
-			Catch ex As DbUpdateException
-				modelMethodContext.ModelState.AddModelError("UpdateError", ex.InnerException.InnerException.Message)
-				ret = 0
-			End Try
+		' <summary>
+		' Updates a record in the database using model binding
+		' </summary>
+		Public Function UpdateItemBase(id As TKey, modelMethodContext As ModelMethodContext) As Integer Implements IRepository(Of TEntity, TKey).UpdateItemBase
+			Dim ret As Integer = 0
+			Dim item = Me.dbrepSet.Find(id)
 
-			Return ret
-		End If
+			If item Is Nothing Then
+				modelMethodContext.ModelState.AddModelError("", [String].Format("Item with id {0} was not found", If(id Is Nothing, "null", id.ToString())))
+				Return 0
+			End If
 
-		Return 0
-	End Function
+			modelMethodContext.TryUpdateModel(item)
+			If modelMethodContext.ModelState.IsValid Then
+				Try
+					ret = dbrepContext.SaveChanges()
+				Catch ex As DbUpdateException
+					modelMethodContext.ModelState.AddModelError("UpdateError", ex.InnerException.InnerException.Message)
+					ret = 0
+				End Try
 
-	''' <summary>
-	''' Deletes a record from the database
-	''' </summary>
-	Public Function DeleteItemBase(id As TKey, modelMethodContext As ModelMethodContext) As Integer
-		Dim item = Me.dbrepSet.Find(id)
+				Return ret
+			End If
 
-		If item IsNot Nothing Then
-			Me.dbrepSet.Remove(item)
-			Return dbrepContext.SaveChanges()
-		Else
-			modelMethodContext.ModelState.AddModelError("idNotFound", [String].Format("A Item with id {0} was not found", If(id Is Nothing, "null", id.ToString())))
-		End If
+			Return 0
+		End Function
 
-		Return 0
-	End Function
+		' <summary>
+		' Deletes a record from the database
+		' </summary>
+		Public Function DeleteItemBase(id As TKey, modelMethodContext As ModelMethodContext) As Integer Implements IRepository(Of TEntity, TKey).DeleteItemBase
+			Dim item = Me.dbrepSet.Find(id)
+
+			If item IsNot Nothing Then
+				Me.dbrepSet.Remove(item)
+				Return dbrepContext.SaveChanges()
+			Else
+				modelMethodContext.ModelState.AddModelError("idNotFound", [String].Format("A Item with id {0} was not found", If(id Is Nothing, "null", id.ToString())))
+			End If
+
+			Return 0
+		End Function
+
+		' Corrects the sorting that listview gets confused over
+        Public Function CorrectSorting(listViewSort As String, sessionSort As Object, sessionOrder As Object)
+            Dim sortExpression As String = If(sessionSort Is Nothing, String.Empty, sessionSort.ToString())
+            Dim SDirection As SortDirection = If(sessionOrder Is Nothing, SortDirection.Ascending, DirectCast(sessionOrder, SortDirection))
+
+            If listViewSort IsNot Nothing Then
+                If listViewSort.EndsWith(" DESC") Then
+                    listViewSort = listViewSort.Substring(0, listViewSort.Length - 5)
+                End If
+                listViewSort = listViewSort & (If(SDirection = SortDirection.Ascending, "", " DESC"))
+            Else
+                If sortExpression <> String.Empty Then
+                    listViewSort = sortExpression & (If(SDirection = SortDirection.Ascending, "", " DESC"))
+                End If
+            End If
+
+            Return listViewSort
+        End Function
+	End Class
 End Namespace

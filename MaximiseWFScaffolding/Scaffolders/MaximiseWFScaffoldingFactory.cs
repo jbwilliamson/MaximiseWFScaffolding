@@ -34,9 +34,8 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
         // We support CSharp or VB WAPs targetting at least .Net Framework 4.5 or above.
         public override bool IsSupported(CodeGenerationContext codeGenerationContext)
         {
-            //if (ProjectLanguage.CSharp.Equals(codeGenerationContext.ActiveProject.GetCodeLanguage()) || ProjectLanguage.VisualBasic.Equals(codeGenerationContext.ActiveProject.GetCodeLanguage()))
-
-            if (ProjectLanguage.CSharp.Equals(codeGenerationContext.ActiveProject.GetCodeLanguage()))
+            //if (ProjectLanguage.CSharp.Equals(codeGenerationContext.ActiveProject.GetCodeLanguage()))
+            if (ProjectLanguage.CSharp.Equals(codeGenerationContext.ActiveProject.GetCodeLanguage()) || ProjectLanguage.VisualBasic.Equals(codeGenerationContext.ActiveProject.GetCodeLanguage()))
             {
                 FrameworkName targetFramework = codeGenerationContext.ActiveProject.GetTargetFramework();
                 return (targetFramework != null) &&

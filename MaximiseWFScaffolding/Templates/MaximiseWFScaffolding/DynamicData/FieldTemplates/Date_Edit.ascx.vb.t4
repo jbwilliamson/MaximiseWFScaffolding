@@ -8,124 +8,122 @@
 <#@ parameter type="System.String" name="ClientSideValidation" #>
 Imports System.ComponentModel.DataAnnotations
 Imports System.Web.DynamicData
-Imports System.Web
 Imports System.Collections.Specialized
-Imports <#= DefaultNamespace #>.Extenders;
+Imports <#= DefaultNamespace #>.Extenders
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Class DateField
-		Inherits FieldTemplateUserControl
+Partial Public Class Date_EditField
+	Inherits FieldTemplateUserControl
 
-		Public Property SetFocus() As String
-			Get
-				Return m_SetFocus
-			End Get
-			Set
-				m_SetFocus = Value
-			End Set
-		End Property
-		Private m_SetFocus As String
+	Public Property SetFocus() As String
+		Get
+			Return m_SetFocus
+		End Get
+		Set
+			m_SetFocus = Value
+		End Set
+	End Property
+	Private m_SetFocus As String
 
-		Protected Sub Page_Init(sender As Object, e As EventArgs)
-			If Not IsPostBack Then
+	Protected Sub Page_Init(sender As Object, e As EventArgs)
+		If Not IsPostBack Then
 
 <#if (ClientSideValidation == "HTML5") {#>
-				Dim errorMessage As String = ""
+			Dim errorMessage As String = ""
 <#}#>
-				TextBox1.ToolTip = Column.Description
-				Label1.Text = Column.DisplayName + " :"
+			TextBox1.ToolTip = Column.Description
+			Label1.Text = Column.DisplayName + " :"
 
-				If Column.Prompt IsNot Nothing AndAlso Column.Prompt.Length > 0 Then
-					TextBox1.Attributes.Add("placeholder", Column.Prompt)
-				End If
+			If Column.Prompt IsNot Nothing AndAlso Column.Prompt.Length > 0 Then
+				TextBox1.Attributes.Add("placeholder", Column.Prompt)
+			End If
 
-				If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
-					TextBox1.Attributes.Add("autofocus", "autofocus")
-				End If
+			If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
+				TextBox1.Attributes.Add("autofocus", "autofocus")
+			End If
 
-				Dim rangeAttr As RangeAttribute = Column.Attributes.OfType(Of RangeAttribute)().FirstOrDefault()
+			Dim rangeAttr As RangeAttribute = Column.Attributes.OfType(Of RangeAttribute)().FirstOrDefault()
 
 <#
 if (ClientSideValidation == "HTML5") {
 #>
-				TextBox1.Attributes.Add("data-val-clear", "")
-				If Column.IsRequired Then
-					TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.value.length > 0 ? this.dataset.valClear  : this.dataset.valRequired);")
-				Else
-					TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.validity.patternMismatch ? this.dataset.valRegex : (this.validity.rangeUnderflow || this.validity.rangeOverflow) ? this.dataset.valRange : this.dataset.valClear);")
-				End If
+			TextBox1.Attributes.Add("data-val-clear", "")
+			If Column.IsRequired Then
+				TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.value.length > 0 ? this.dataset.valClear  : this.dataset.valRequired);")
+			Else
+				TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.validity.patternMismatch ? this.dataset.valRegex : (this.validity.rangeUnderflow || this.validity.rangeOverflow) ? this.dataset.valRange : this.dataset.valClear);")
+			End If
 <#
 } else {
 #>
-				TextBox1.Attributes.Add("data-val", "true")
+			TextBox1.Attributes.Add("data-val", "true")
 <#}#>
 
 <#
 if (ClientSideValidation != "None") {
 #>
-				If Column.IsRequired Then
+			If Column.IsRequired Then
 <#
 if (ClientSideValidation == "HTML5") {
 #>
-					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-					TextBox1.Attributes.Add("required", "required")
-					errorMessage = "this.validity.valueMissing ? this.dataset.valRequired : "
+				TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+				TextBox1.Attributes.Add("required", "required")
+				errorMessage = "this.validity.valueMissing ? this.dataset.valRequired : "
 <#
 } else {
 #>
-					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-<#}#>
-				End If
-
-<#
-if (ClientSideValidation == "HTML5") {
-#>
-				If rangeAttr IsNot Nothing Then
-					If rangeAttr.Minimum IsNot Nothing Then
-						TextBox1.Attributes.Add("min", rangeAttr.Minimum.ToString())
-					End If
-
-					If rangeAttr.Maximum IsNot Nothing Then
-						TextBox1.Attributes.Add("max", rangeAttr.Maximum.ToString())
-					End If
-
-					TextBox1.Attributes.Add("data-val-range", If(rangeAttr.ErrorMessage Is Nothing, ValidationConstants.Validation_Range_DefaultError, rangeAttr.ErrorMessage))
-					errorMessage = errorMessage & "(this.validity.rangeUnderflow || this.validity.rangeOverflow) ? this.dataset.valRange : "
-				End If
-
-				' Regular expression to validate a date will not work for model binding (regex would be performed on the datetime type and not a string), so regexp is added here and not in the dataannotations
-				TextBox1.Attributes.Add("pattern", ValidationConstants.Date_ValidationRegExpr)
-				TextBox1.Attributes.Add("data-val-regex", ValidationConstants.Date_ValidationRegError)
-				errorMessage = errorMessage & "this.validity.patternMismatch ? this.dataset.valRegex : "
-
-				errorMessage = "setCustomValidity(" & errorMessage & "this.dataset.valClear);"
-				TextBox1.Attributes.Add("oninvalid", errorMessage)
-<#
-} else {
-#>
-				' Regular expression to validate a date will not work for model binding (regex would be performed on the datetime type and not a string), so regexp is added here and not in the dataannotations
-				TextBox1.Attributes.Add("data-val-regex-pattern", ValidationConstants.Date_ValidationRegExpr)
-				TextBox1.Attributes.Add("data-val-regex", ValidationConstants.Date_ValidationRegError)
-<#}#>
+				TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
 <#}#>
 			End If
-		End Sub
 
-		' show bootstrap has-error
-		Protected Sub Page_PreRender(sender As Object, e As EventArgs)
-			' if validation error then apply bootstrap has-error CSS class
-			Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
-			Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
-		End Sub
+<#
+if (ClientSideValidation == "HTML5") {
+#>
+			If rangeAttr IsNot Nothing Then
+				If rangeAttr.Minimum IsNot Nothing Then
+					TextBox1.Attributes.Add("min", rangeAttr.Minimum.ToString())
+				End If
 
-		Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
-			dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text) & " 12:00:00"
-		End Sub
+				If rangeAttr.Maximum IsNot Nothing Then
+					TextBox1.Attributes.Add("max", rangeAttr.Maximum.ToString())
+				End If
 
-		Public Overrides ReadOnly Property DataControl() As Control
-			Get
-				Return TextBox1
-			End Get
-		End Property
-	End Class
-End Namespace
+				TextBox1.Attributes.Add("data-val-range", If(rangeAttr.ErrorMessage Is Nothing, ValidationConstants.Validation_Range_DefaultError, rangeAttr.ErrorMessage))
+				errorMessage = errorMessage & "(this.validity.rangeUnderflow || this.validity.rangeOverflow) ? this.dataset.valRange : "
+			End If
+
+			' Regular expression to validate a date will not work for model binding (regex would be performed on the datetime type and not a string), so regexp is added here and not in the dataannotations
+			TextBox1.Attributes.Add("pattern", ValidationConstants.Date_ValidationRegExpr)
+			TextBox1.Attributes.Add("data-val-regex", ValidationConstants.Date_ValidationRegError)
+			errorMessage = errorMessage & "this.validity.patternMismatch ? this.dataset.valRegex : "
+
+			errorMessage = "setCustomValidity(" & errorMessage & "this.dataset.valClear);"
+			TextBox1.Attributes.Add("oninvalid", errorMessage)
+<#
+} else {
+#>
+			' Regular expression to validate a date will not work for model binding (regex would be performed on the datetime type and not a string), so regexp is added here and not in the dataannotations
+			TextBox1.Attributes.Add("data-val-regex-pattern", ValidationConstants.Date_ValidationRegExpr)
+			TextBox1.Attributes.Add("data-val-regex", ValidationConstants.Date_ValidationRegError)
+<#}#>
+<#}#>
+		End If
+	End Sub
+
+	' show bootstrap has-error
+	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+		' if validation error then apply bootstrap has-error CSS class
+		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+	End Sub
+
+	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+		dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text) & " 12:00:00"
+	End Sub
+
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return TextBox1
+		End Get
+	End Property
+End Class
+

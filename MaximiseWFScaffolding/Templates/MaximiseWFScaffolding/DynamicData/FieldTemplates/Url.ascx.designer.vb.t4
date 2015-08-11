@@ -6,8 +6,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class UrlField
-		Protected HyperLinkUrl As Global.System.Web.UI.WebControls.HyperLink
-	End Class
-End Namespace
+Public Partial Class UrlField
+	Protected HyperLinkUrl As Global.System.Web.UI.WebControls.HyperLink
+End Class
+

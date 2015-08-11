@@ -225,7 +225,8 @@ namespace ScaffoldFilter
         // Would need to use the [ForeignKey("")], to specify the name if different 
         private string CheckForeignKeyName(Type efModelType, string fieldName)
         {
-            string keyName = fieldName;
+            string keyName = string.Empty;
+            string idName = string.Empty;
 
             foreach (PropertyInfo prop in efModelType.GetProperties().Where(p => p.PropertyType.IsClass == true && p.PropertyType != typeof(string)))
             {
@@ -236,6 +237,10 @@ namespace ScaffoldFilter
                     {
                         foreach (PropertyInfo propForeign in prop.PropertyType.GetProperties())
                         {
+                            if ((idName == string.Empty && propForeign.Name.Contains("id")) || propForeign.Name.ToLower().Equals("id")) {
+                                idName = propForeign.Name;
+                            }
+
                             var keyAttribute = (KeyAttribute)propForeign.GetCustomAttribute(typeof(KeyAttribute), true);
                             if (keyAttribute != null)
                             {
@@ -245,6 +250,16 @@ namespace ScaffoldFilter
                         }
                         break;
                     }
+                }
+            }
+
+            if (keyName == string.Empty)
+            {
+                if (idName == string.Empty) {
+                    keyName = fieldName;
+                }
+                else {
+                    keyName = idName;
                 }
             }
 

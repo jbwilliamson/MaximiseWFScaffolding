@@ -57,7 +57,7 @@ if (property.IsForeignKey) {
 							<strong><#= GetDisplayName(property.PropertyName, false) #></strong>
 						</div>
 						<div class="col-sm-4">
-							<%#: Item.<#=relatedModel.AssociationPropertyName#> != null ? Item.<#=relatedModel.AssociationPropertyName#>.<#=relatedModel.DisplayPropertyName#> : "Not Set" %>
+							<%#: If(Item.<#=relatedModel.AssociationPropertyName#> IsNot Nothing, Item.<#=relatedModel.AssociationPropertyName#>.<#=relatedModel.DisplayPropertyName#>, "Not Set") %>
 						</div>
 					</div>
 <#

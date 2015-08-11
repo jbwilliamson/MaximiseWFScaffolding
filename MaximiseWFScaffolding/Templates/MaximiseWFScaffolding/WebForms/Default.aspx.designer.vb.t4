@@ -16,14 +16,9 @@
 '------------------------------------------------------------------------------
 
 Public Partial Class <#=CodeBesideName#>
-	''' <summary>
-	''' form1 control.
-	''' </summary>
-	''' <remarks>
-	''' Auto-generated field.
-	''' To modify move field declaration from designer file to code-behind file.
-	''' </remarks>
-	Protected form1 As Global.System.Web.UI.HtmlControls.HtmlForm
-	Protected ListView1 As Global.System.Web.UI.WebControls.ListView
+	Protected WithEvents lv<#= ModelName #> As Global.System.Web.UI.WebControls.ListView
+	Protected WithEvents dp<#= ModelName #> As Global.System.Web.UI.WebControls.DataPager
+<#if (FilterOnModel == true) {#>
+	Protected WithEvents FilterRepeater As Global.ScaffoldFilter.ScaffoldingFilterRepeater
+<#}#>
 End Class
-

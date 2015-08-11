@@ -24,6 +24,7 @@
 <#@ parameter type="System.Collections.Generic.Dictionary<string, string>" name="FieldGroups" #>
 <#@ parameter type="System.Collections.Generic.Dictionary<string, string>" name="ShortNames" #>
 <#@ parameter type="System.Collections.Generic.Dictionary<string, string>" name="GridView" #>
+<#@ parameter type="System.Boolean" name="FilterOnModel" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
 <#@ parameter type="System.String" name="FolderNamespace" #>
 <#@ parameter type="System.String" name="ModelNamespace" #>

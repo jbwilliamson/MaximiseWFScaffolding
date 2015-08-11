@@ -9,104 +9,102 @@
 Imports System.Web.DynamicData
 Imports <#= DefaultNamespace #>.Extenders
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class Enumeration_EditField
-		Inherits System.Web.DynamicData.FieldTemplateUserControl
+Public Partial Class Enumeration_EditField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
 		
-		Private _enumType As Type
-		Public Property SetFocus() As String
-			Get
-				Return m_SetFocus
-			End Get
-			Set
-				m_SetFocus = Value
-			End Set
-		End Property
-		Private m_SetFocus As String
-		Private defaultValue As String = ""
+	Private _enumType As Type
+	Public Property SetFocus() As String
+		Get
+			Return m_SetFocus
+		End Get
+		Set
+			m_SetFocus = Value
+		End Set
+	End Property
+	Private m_SetFocus As String
+	Private defaultValue As String = ""
 
-		Protected Sub Page_Init(sender As Object, e As EventArgs)
-			If Not IsPostBack Then
-				Label1.Text = Column.DisplayName + " :"
-				DropDownList1.ToolTip = Column.Description
+	Protected Sub Page_Init(sender As Object, e As EventArgs)
+		If Not IsPostBack Then
+			Label1.Text = Column.DisplayName + " :"
+			DropDownList1.ToolTip = Column.Description
 
-				If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
-					DropDownList1.Attributes.Add("autofocus", "autofocus")
-				End If
+			If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
+				DropDownList1.Attributes.Add("autofocus", "autofocus")
+			End If
 
 <#if (ClientSideValidation != "None") {#>
-				If Column.IsRequired Then
+			If Column.IsRequired Then
 <#if (ClientSideValidation == "HTML5") {#>
-					DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-					DropDownList1.Attributes.Add("data-val-clear", "")
-					DropDownList1.Attributes.Add("required", "required")
-					DropDownList1.Attributes.Add("oninvalid", "setCustomValidity(this.dataset.valRequired);")
-					DropDownList1.Attributes.Add("onchange", "setCustomValidity(this.dataset.valClear);")
+				DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+				DropDownList1.Attributes.Add("data-val-clear", "")
+				DropDownList1.Attributes.Add("required", "required")
+				DropDownList1.Attributes.Add("oninvalid", "setCustomValidity(this.dataset.valRequired);")
+				DropDownList1.Attributes.Add("onchange", "setCustomValidity(this.dataset.valClear);")
 <#} else {#>
-					DropDownList1.Attributes.Add("data-val", "true")
-					DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+				DropDownList1.Attributes.Add("data-val", "true")
+				DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
 <#}#>
-				End If
+			End If
 <#}#>
 
-				If DropDownList1.Items.Count = 0 Then
-					If Mode = DataBoundControlMode.Insert OrElse Not Column.IsRequired Then
-						DropDownList1.Items.Add(New ListItem("Select An Option", [String].Empty))
+			If DropDownList1.Items.Count = 0 Then
+				If Mode = DataBoundControlMode.Insert OrElse Not Column.IsRequired Then
+					DropDownList1.Items.Add(New ListItem("Select An Option", [String].Empty))
+				End If
+				PopulateListControl(DropDownList1)
+
+				defaultValue = Convert.ToString(Column.DefaultValue)
+
+				If defaultValue <> String.Empty AndAlso Mode = DataBoundControlMode.Insert Then
+					Dim li As ListItem = DropDownList1.Items.FindByValue(defaultValue)
+					If li IsNot Nothing Then
+						DropDownList1.SelectedValue = defaultValue
 					End If
-					PopulateListControl(DropDownList1)
-
-					defaultValue = Convert.ToString(Column.DefaultValue)
-
-					If defaultValue <> String.Empty AndAlso Mode = DataBoundControlMode.Insert Then
-						Dim li As ListItem = DropDownList1.Items.FindByValue(defaultValue)
-						If li IsNot Nothing Then
-							DropDownList1.SelectedValue = defaultValue
-						End If
-					End If
 				End If
 			End If
-		End Sub
+		End If
+	End Sub
 
-		' show bootstrap has-error
-		Protected Sub Page_PreRender(sender As Object, e As EventArgs)
-			' if validation error then apply bootstrap has-error CSS class
-			Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
-			Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
-		End Sub
+	' show bootstrap has-error
+	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+		' if validation error then apply bootstrap has-error CSS class
+		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+	End Sub
 
-		Protected Overrides Sub OnDataBinding(e As EventArgs)
-			MyBase.OnDataBinding(e)
+	Protected Overrides Sub OnDataBinding(e As EventArgs)
+		MyBase.OnDataBinding(e)
 
-			If Mode = DataBoundControlMode.Edit AndAlso FieldValue IsNot Nothing Then
-				Dim selectedValueString As String = GetSelectedValueString()
-				Dim item As ListItem = DropDownList1.Items.FindByValue(selectedValueString)
-				If item IsNot Nothing Then
-					DropDownList1.SelectedValue = selectedValueString
-				End If
+		If Mode = DataBoundControlMode.Edit AndAlso FieldValue IsNot Nothing Then
+			Dim selectedValueString As String = GetSelectedValueString()
+			Dim item As ListItem = DropDownList1.Items.FindByValue(selectedValueString)
+			If item IsNot Nothing Then
+				DropDownList1.SelectedValue = selectedValueString
 			End If
-		End Sub
+		End If
+	End Sub
 
-		Private ReadOnly Property EnumType() As Type
-			Get
-				If _enumType Is Nothing Then
-					_enumType = Column.GetEnumType()
-				End If
-				Return _enumType
-			End Get
-		End Property
-
-		Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
-			Dim value As String = DropDownList1.SelectedValue
-			If value = [String].Empty Then
-				value = Nothing
+	Private ReadOnly Property EnumType() As Type
+		Get
+			If _enumType Is Nothing Then
+				_enumType = Column.GetEnumType()
 			End If
-			dictionary(Column.Name) = ConvertEditedValue(value)
-		End Sub
+			Return _enumType
+		End Get
+	End Property
 
-		Public Overrides ReadOnly Property DataControl() As Control
-			Get
-				Return DropDownList1
-			End Get
-		End Property
-	End Class
-End Namespace
+	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+		Dim value As String = DropDownList1.SelectedValue
+		If value = [String].Empty Then
+			value = Nothing
+		End If
+		dictionary(Column.Name) = ConvertEditedValue(value)
+	End Sub
+
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return DropDownList1
+		End Get
+	End Property
+End Class

@@ -122,6 +122,7 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
             // Get Model Type
             var modelType = codeGeneratorViewModel.ModelType.CodeType;
             string firstfocusField = "";
+            bool filterOnModel = false;
             IDictionary<string, string> fieldGroups;
             IDictionary<string, string> shortNames;
             IDictionary<string, string> gridView;
@@ -136,6 +137,8 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
             fieldGroups = FindFieldGroups(efMetadata, modelType);
             gridView = GridViewDisplay(efMetadata, modelType);
             shortNames = FindAnyShortNames(efMetadata, modelType);
+            filterOnModel = FilteringOnModel(efMetadata, modelType);
+
 
             foreach (PropertyMetadata pma in efMetadataUnOrdered.Properties)
             {
@@ -193,7 +196,6 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
                 codeGeneratorViewModel.OverwriteViews
             );
 
-
             // Add Web Forms Pages from Templates
             AddWebFormsPages(
                 project, 
@@ -206,6 +208,7 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
                 fieldGroups,
                 shortNames,
                 gridView,
+                filterOnModel,
                 codeGeneratorViewModel.UseMasterPage,
                 codeGeneratorViewModel.UseAsyncRepository,
                 codeGeneratorViewModel.UseClientSideValidation, 
@@ -495,6 +498,7 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
             IDictionary<string, string> fieldGroups,
             IDictionary<string, string> shortNames,
             IDictionary<string, string> gridView,
+            bool filterOnModel,
             bool useMasterPage,
             bool useAsyncRepository,
             bool useClientSideValidation, 
@@ -543,6 +547,7 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
                     fieldGroups : fieldGroups,
                     shortNames : shortNames,
                     gridView : gridView,
+                    filterOnModel : filterOnModel,
                     dbContextNamespace: dbContextNamespace,
                     dbContextTypeName: dbContextTypeName,
                     viewClassName : viewClassName,
@@ -569,6 +574,7 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
                                 IDictionary<string, string> fieldGroups,
                                 IDictionary<string, string> shortNames,
                                 IDictionary<string, string> gridView,
+                                bool filterOnModel,
                                 string dbContextNamespace,
                                 string dbContextTypeName,
                                 string viewClassName,
@@ -644,6 +650,7 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
                         {"FieldGroups", fieldGroups}, // groups used to setup fieldsets
                         {"ShortNames", shortNames}, // use the short name from the display attribute for list view
                         {"GridView", gridView}, // use the custom defined attribute to include/exclude fields on the default record list
+                        {"FilterOnModel", filterOnModel}, // Use to generate filter code for list view
 
                         {"DefaultNamespace", defaultNamespace}, // the default namespace of the project (used by VB)
                         {"FolderNamespace", folderNamespace}, // the namespace of the current folder (used by C#)
@@ -820,7 +827,8 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
             var type = GetReflectionType(modelType.FullName);
             var lookup = new Dictionary<string, string>();
 
-            foreach (PropertyInfo prop in type.GetProperties()) {
+            foreach (PropertyInfo prop in type.GetProperties()) 
+            {
                 var attr = (DisplayAttribute)prop.GetCustomAttribute(typeof(DisplayAttribute), true);
                 var value = "";
 
@@ -854,10 +862,6 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
                         {
                             shortNames.Add(pma.PropertyName, attr.GetShortName());
                         }
-                        //else
-                        //{
-                        //    shortNames.Add(pma.PropertyName, pma.PropertyName);
-                        //}
                     }
                 }
             }
@@ -1104,6 +1108,36 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.Scaffolders
             });
   
             return efMetadataUnOrdered;
+        }
+
+        // Check if the model requires a filter, use flag to generate filter code in default.aspx
+        private bool FilteringOnModel(ModelMetadata efMetadata, CodeType modelType)
+        {
+            bool foundFilter = false;
+
+            var type = GetReflectionType(modelType.FullName);
+
+            foreach (PropertyMetadata pma in efMetadata.Properties)
+            {
+                foreach (PropertyInfo prop in type.GetProperties())
+                {
+                    if (pma.PropertyName == prop.Name)
+                    {
+                        var attr = (FilterUIHintAttribute)prop.GetCustomAttribute(typeof(FilterUIHintAttribute), true);
+                        if (attr != null)
+                        {
+                            if (attr.FilterUIHint == "ForeignKey" || attr.FilterUIHint == "Enumeration") {
+                                foundFilter = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (foundFilter) break;
+            }
+
+            return foundFilter;
         }
     }
 }

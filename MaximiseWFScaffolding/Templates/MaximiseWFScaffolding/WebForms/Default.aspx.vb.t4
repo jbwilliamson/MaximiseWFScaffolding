@@ -1,34 +1,38 @@
 ﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
-<#@ include file="Imports.include.t4" #>
-
-Imports System.Collections.Generic;
-Imports System.Linq;
-Imports System.Web;
-Imports System.Web.UI;
-Imports System.Web.UI.WebControls;
-Imports System.Web.UI.HtmlControls;
-Imports RandomSchool.Extenders;
-Imports RandomSchool.Repositories;
-Imports RandomSchool.Filters;
-Imports ScaffoldFilter;
+<#@ include file="Imports.include.t4" #><##>
+Imports System.Collections.Generic
+Imports System.Linq
+Imports System.Web
+Imports System.Web.UI
+Imports System.Web.UI.WebControls
+Imports System.Web.UI.HtmlControls
+Imports <#= DefaultNamespace #>.Extenders
+Imports <#= DefaultNamespace #>.Repositories
+<#if(IsAsyncRepository) {#>
+Imports System.Threading.Tasks
+<#}#>
+Imports ScaffoldFilter
 
 Public Partial Class <#=CodeBesideName#>
 	Inherits System.Web.UI.Page
 
+<#if(IsAsyncRepository) {#>
+	Private _repository As New <#= ModelName #>RepositoryAsync(Of <#=FullModelName#>, <#=PrimaryKeyType#>)()
+<#} else {#>
 	Private _repository As New <#= ModelName #>Repository(Of <#=FullModelName#>, <#=PrimaryKeyType#>)()
+<#}#>
 	Private FilterDefaults As New Dictionary(Of String, String)()
 
 	Protected Sub Page_Load(sender As Object, e As EventArgs)
 		lv<#= ModelName #>.SetDataMethodsObject(_repository)
 
 		If Not IsPostBack Then
-			Dim dp As DataPager = DirectCast(lv<#= ModelName #>.FindControl("dp<#= ModelName #>"), DataPager)
-			If dp IsNot Nothing Then
+			If dp<#= ModelName #> IsNot Nothing Then
 				If Session("<#= ModelName #>CurrentPage") IsNot Nothing AndAlso Session("<#= ModelName #>PageSize") IsNot Nothing Then
-					dp.SetPageProperties(Convert.ToInt32(Session("<#= ModelName #>CurrentPage")), Convert.ToInt32(Session("<#= ModelName #>PageSize")), True)
+					dp<#= ModelName #>.SetPageProperties(Convert.ToInt32(Session("<#= ModelName #>CurrentPage")), Convert.ToInt32(Session("<#= ModelName #>PageSize")), False)
 				Else
-					dp.SetPageProperties(0, 10, True)
+					dp<#= ModelName #>.SetPageProperties(0, 10, False)
 				End If
 			End If
 		End If
@@ -36,16 +40,26 @@ Public Partial Class <#=CodeBesideName#>
 
 	Protected Sub ddlPageSize_SelectedIndexChanged(sender As Object, e As EventArgs)
 		Dim ddl As DropDownList = DirectCast(sender, DropDownList)
-		Dim dp As DataPager = DirectCast(lv<#= ModelName #>.FindControl("dp<#= ModelName #>"), DataPager)
-		dp.PageSize = Convert.ToInt32(ddl.SelectedValue)
-		Session("<#= ModelName #>PageSize") = dp.PageSize
-		dp.SetPageProperties(0, Convert.ToInt32(Session("<#= ModelName #>PageSize")), True)
+		dp<#= ModelName #>.PageSize = Convert.ToInt32(ddl.SelectedValue)
+		Session("<#= ModelName #>PageSize") = dp<#= ModelName #>.PageSize
+		dp<#= ModelName #>.SetPageProperties(0, Convert.ToInt32(Session("<#= ModelName #>PageSize")), False)
 	End Sub
 
 	Protected Sub lv<#= ModelName #>_Sorting(sender As Object, e As ListViewSortEventArgs)
 		Session("<#= ModelName #>SortExpression") = e.SortExpression
-		Session("<#= ModelName #>SortDirection") = e.SortDirection
-		Session("<#= ModelName #>CurrentPage") = 0
+		
+        If (Session("<#= ModelName #>SortDirection") Is Nothing) Then
+            Session("<#= ModelName #>SortDirection") = e.SortDirection
+        Else
+            Dim sd As SortDirection = DirectCast(Session("<#= ModelName #>SortDirection"), SortDirection)
+            If sd = SortDirection.Ascending Then
+                Session("<#= ModelName #>SortDirection") = SortDirection.Descending
+            Else
+                Session("<#= ModelName #>SortDirection") = SortDirection.Ascending
+            End If
+        End If
+
+        Session("<#= ModelName #>CurrentPage") = 0
 
 		DisplayedSortedArrows()
 	End Sub
@@ -62,6 +76,7 @@ Public Partial Class <#=CodeBesideName#>
 		End If
 	End Sub
 
+<#if (FilterOnModel == true) {#>
 	Protected Sub ScaffoldLabel_PreRender(sender As Object, e As EventArgs)
 		Dim label As Label = DirectCast(sender, Label)
 		Dim scaffoldFilter As ScaffoldFilterControl = DirectCast(label.FindControl("ScaffoldFilter"), ScaffoldFilterControl)
@@ -72,7 +87,7 @@ Public Partial Class <#=CodeBesideName#>
 	End Sub
 
 	Protected Sub ScaffoldFilter_FilterChanged(sender As Object, e As FilterChangeEventArgs)
-		Dim val As String
+		Dim val As String = ""
 
 		If Session("<#= ModelName #>FilterDefault") Is Nothing Then
 			If e.SelectedValue.Length > 0 Then
@@ -97,9 +112,8 @@ Public Partial Class <#=CodeBesideName#>
 			Session("<#= ModelName #>FilterDefault") = FilterDefaults
 		End If
 
-		Dim dp As DataPager = DirectCast(lv<#= ModelName #>.FindControl("dp<#= ModelName #>"), DataPager)
-		If dp IsNot Nothing Then
-			dp.SetPageProperties(0, dp.PageSize, True)
+		If dp<#= ModelName #> IsNot Nothing Then
+			dp<#= ModelName #>.SetPageProperties(0, dp<#= ModelName #>.PageSize, False)
 		End If
 	End Sub
 
@@ -110,17 +124,28 @@ Public Partial Class <#=CodeBesideName#>
 			End If
 		End If
 	End Sub
+<#}#>
 
+<#if(IsAsyncRepository) {#>
+	Public Function ForeignKeyEventHandler_LoadForeignKey(e As ForeignModelEventArgs) As Task
+		e.returnResults = Await _repository.GetForeignListAsync(e.foreignKeyModel, e.keyType)
+	End Function
+<#} else {#>
 	Public Sub ForeignKeyEventHandler_LoadForeignKey(e As ForeignModelEventArgs)
 		e.returnResults = _repository.GetForeignList(e.foreignKeyModel, e.keyType)
 	End Sub
+<#}#>
 
 	Protected Sub sfForeignKey_Load(sender As Object, e As EventArgs)
 		Dim scaffoldFilter As ScaffoldFilterControl = DirectCast(sender, ScaffoldFilterControl)
 		Dim sfuc As ForeignKeyFilter = TryCast(scaffoldFilter.FilterTemplate, ForeignKeyFilter)
 
 		If sfuc IsNot Nothing Then
-			sfuc.ForeignKey += New ForeignKeyEventHandler(ForeignKeyEventHandler_LoadForeignKey)
+<#if(IsAsyncRepository) {#>
+			AddHandler sfuc.ForeignKey, New AsyncForeignKeyEventHandler(AddressOf ForeignKeyEventHandler_LoadForeignKey)
+<#} else {#>
+			AddHandler sfuc.ForeignKey, New ForeignKeyEventHandler(AddressOf ForeignKeyEventHandler_LoadForeignKey)
+<#}#>
 		End If
 	End Sub
 
@@ -156,5 +181,4 @@ Public Partial Class <#=CodeBesideName#>
 		End If
 	End Sub
 End Class
-
 <#@ include file="ModelMetadataFunctions.cs.include.t4" #>

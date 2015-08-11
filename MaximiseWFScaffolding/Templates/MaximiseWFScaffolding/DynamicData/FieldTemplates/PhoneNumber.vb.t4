@@ -5,5 +5,5 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-<%@ Control Language="VB" CodeBehind="PhoneNumber.ascx.vb" Inherits="<#= DefaultNamespace #>.FieldTemplates.PhoneNumberField" %>
+<%@ Control Language="VB" CodeBehind="PhoneNumber.ascx.vb" Inherits="<#= DefaultNamespace #>.PhoneNumberField" %>
 <asp:Literal runat="server" ID="Literal1" Text="<%# FieldValueString %>" />

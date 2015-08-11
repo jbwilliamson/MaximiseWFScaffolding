@@ -2,246 +2,242 @@
 <#@ Output Extension="vb" #>
 <#@ include file="../../WebForms/Imports.include.t4" #>
 Imports System.Web.DynamicData
+Imports System.ComponentModel.DataAnnotations
 <#if(IsAsyncRepository) {#>
-Imports System.Threading;
-Imports System.Threading.Tasks;
+Imports System.Threading
+Imports System.Threading.Tasks
 <#}#>
+Imports <#= DefaultNamespace #>.Extenders
+Imports ScaffoldFilter
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class ForeignKey_EditField
-		Inherits System.Web.DynamicData.FieldTemplateUserControl
+Public Partial Class ForeignKey_EditField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
 
-		Public Property DataTypeName() As String
-			Get
-				Return m_DataTypeName
-			End Get
-			Set
-				m_DataTypeName = Value
-			End Set
-		End Property
-		Private m_DataTypeName As String
-		Public Property DataTextField() As String
-			Get
-				Return m_DataTextField
-			End Get
-			Set
-				m_DataTextField = Value
-			End Set
-		End Property
-		Private m_DataTextField As String
-		Public Property DataValueField() As String
-			Get
-				Return m_DataValueField
-			End Get
-			Set
-				m_DataValueField = Value
-			End Set
-		End Property
-		Private m_DataValueField As String
+	Public Property DataTypeName() As String
+		Get
+			Return m_DataTypeName
+		End Get
+		Set
+			m_DataTypeName = Value
+		End Set
+	End Property
+	Private m_DataTypeName As String
+	Public Property DataTextField() As String
+		Get
+			Return m_DataTextField
+		End Get
+		Set
+			m_DataTextField = Value
+		End Set
+	End Property
+	Private m_DataTextField As String
+	Public Property DataValueField() As String
+		Get
+			Return m_DataValueField
+		End Get
+		Set
+			m_DataValueField = Value
+		End Set
+	End Property
+	Private m_DataValueField As String
 
-		Public Property SetFocus() As String
-			Get
-				Return m_SetFocus
-			End Get
-			Set
-				m_SetFocus = Value
-			End Set
-		End Property
-		Private m_SetFocus As String
-		Private SetValue As String
-		Private sortByColumn As String = ""
-		Private sortDescending As Boolean = False
+	Public Property SetFocus() As String
+		Get
+			Return m_SetFocus
+		End Get
+		Set
+			m_SetFocus = Value
+		End Set
+	End Property
+	Private m_SetFocus As String
+	Private SetValue As String
+	Private sortByColumn As String = ""
+	Private sortDescending As Boolean = False
 		
 <#if(IsAsyncRepository) {#>
-		Public Event ForeignKey As AsyncForeignKeyEventHandler
+	Public Event ForeignKey As AsyncForeignKeyEventHandler
 <#} else {#>
-		Public Event ForeignKey As ForeignKeyEventHandler
+	Public Event ForeignKey As ForeignKeyEventHandler
 <#}#>
 
-		Protected Sub Page_Init(sender As Object, e As EventArgs)
-			If Not IsPostBack Then
-				Label1.Text = Column.DisplayName + " :"
+	Protected Sub Page_Init(sender As Object, e As EventArgs)
+		If Not IsPostBack Then
+			Label1.Text = Column.DisplayName + " :"
 
-				If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
-					DropDownList1.Attributes.Add("autofocus", "autofocus")
-				End If
+			If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
+				DropDownList1.Attributes.Add("autofocus", "autofocus")
+			End If
 
 <#if (ClientSideValidation != "None") {#>
-				If Column.IsRequired Then
+			If Column.IsRequired Then
 <#if (ClientSideValidation == "HTML5") {#>
-					DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-					DropDownList1.Attributes.Add("data-val-clear", "")
-					DropDownList1.Attributes.Add("required", "required")
+				DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+				DropDownList1.Attributes.Add("data-val-clear", "")
+				DropDownList1.Attributes.Add("required", "required")
 
-					DropDownList1.Attributes.Add("oninvalid", "setCustomValidity(this.dataset.valRequired);")
-					DropDownList1.Attributes.Add("onchange", "setCustomValidity(this.dataset.valClear);")
+				DropDownList1.Attributes.Add("oninvalid", "setCustomValidity(this.dataset.valRequired);")
+				DropDownList1.Attributes.Add("onchange", "setCustomValidity(this.dataset.valClear);")
 <#} else {#>
-					DropDownList1.Attributes.Add("data-val", "true")
-					DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-<#}#>
-				End If
-<#}#>
-
-				Dim uihintAttr As UIHintAttribute = Column.Attributes.OfType(Of UIHintAttribute)().FirstOrDefault()
-
-				If uihintAttr IsNot Nothing Then
-					Dim cpSortBy As Object = Nothing
-					Dim cpDescendingOrder As Object = Nothing
-
-					If uihintAttr.ControlParameters.ContainsKey(ScaffoldConst.ForeignKey_RequireSorting) Then
-						cpSortBy = uihintAttr.ControlParameters(ScaffoldConst.ForeignKey_RequireSorting)
-					End If
-
-					If uihintAttr.ControlParameters.ContainsKey(ScaffoldConst.ForeignKey_SortDesending) Then
-						cpDescendingOrder = uihintAttr.ControlParameters(ScaffoldConst.ForeignKey_SortDesending)
-					End If
-
-					sortByColumn = String.Empty
-					If cpSortBy IsNot Nothing Then
-						sortByColumn = cpSortBy.ToString()
-					End If
-
-					sortDescending = False
-					If cpDescendingOrder IsNot Nothing Then
-						sortDescending = Convert.ToBoolean(cpDescendingOrder)
-					End If
-				End If
-			End If
-		End Sub
-
-		' show bootstrap has-error
-		Protected Sub Page_PreRender(sender As Object, e As EventArgs)
-			Dim defaultValue As String = ""
-			' if validation error then apply bootstrap has-error CSS class
-			Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
-			Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
-
-			If Not IsPostBack Then
-				If Me.Mode = DataBoundControlMode.Insert Then
-					DropDownList1.Items.Insert(0, New ListItem("Select An Option", ""))
-					DropDownList1.SelectedIndex = 0
-
-					defaultValue = Convert.ToString(Column.DefaultValue)
-
-					If defaultValue <> String.Empty Then
-						Dim li As ListItem = DropDownList1.Items.FindByValue(defaultValue)
-						If li IsNot Nothing Then
-							DropDownList1.SelectedValue = defaultValue
-						End If
-					End If
-				End If
-
-				If Me.Mode = DataBoundControlMode.Edit Then
-					If DropDownList1.Items.Count > 0 AndAlso SetValue IsNot Nothing Then
-						If SetValue = String.Empty Then
-							If DropDownList1.Items(0).Text <> "Not Set" Then
-								DropDownList1.Items.Insert(0, New ListItem("Not Set", ""))
-							End If
-							DropDownList1.SelectedIndex = 0
-						Else
-							DropDownList1.SelectedValue = SetValue
-						End If
-					Else
-						If DropDownList1.Items.Count = 0 Then
-							DropDownList1.Items.Insert(0, New ListItem("None Available", ""))
-						End If
-					End If
-				End If
-			End If
-		End Sub
-
-		Protected Overrides Sub OnDataBinding(e As EventArgs)
-			MyBase.OnDataBinding(e)
-
-			If Not IsPostBack Then
-				If Me.Mode = DataBoundControlMode.Edit Then
-					SetValue = FieldValueString
-				End If
-			End If
-		End Sub
-
-		Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
-			' If it's an empty string, change it to null
-			Dim value As String = DropDownList1.SelectedValue
-			If [String].IsNullOrEmpty(value) Then
-				value = Nothing
-			End If
-
-			dictionary(Column.Name) = ConvertEditedValue(value)
-		End Sub
-
-		Public Overrides ReadOnly Property DataControl() As Control
-			Get
-				Return DropDownList1
-			End Get
-		End Property
-
-
-		Protected Sub DropDownList1_Load(sender As Object, e As EventArgs)
-			If Not IsPostBack Then
-				Dim fmea As New ForeignModelEventArgs()
-				fmea.returnResults = Nothing
-				fmea.foreignKeyModel = DataTypeName
-				fmea.keyType = ForeignModelEventArgs.LoadForeignTableByModel
-
-<#if(IsAsyncRepository) {#>
-				Me.Page.RegisterAsyncTask(New PageAsyncTask(Function() 
-					If Me.ForeignKey IsNot Nothing Then
-						Await Me.ForeignKey(fmea)
-						PopulateListControl(fmea.returnResults, DataValueField, DataTextField)
-					End If
-					End Function))
-<#}else {#>
-				If Me.ForeignKey IsNot Nothing Then
-					Me.ForeignKey(fmea)
-					PopulateListControl(fmea.returnResults, DataValueField, DataTextField)
-				End If
+				DropDownList1.Attributes.Add("data-val", "true")
+				DropDownList1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
 <#}#>
 			End If
-		End Sub
+<#}#>
 
-		Protected Sub PopulateListControl(dataSource As IQueryable, valueField As String, keyField As String)
-			Dim selectData = New List(Of KeyValuePair(Of String, String))()
+			Dim uihintAttr As UIHintAttribute = Column.Attributes.OfType(Of UIHintAttribute)().FirstOrDefault()
 
-			If dataSource IsNot Nothing Then
-				For Each dataItem As Object In dataSource
-					selectData.Add(New KeyValuePair(Of String, String)(DataBinder.GetPropertyValue(dataItem, keyField, Nothing), DataBinder.GetPropertyValue(dataItem, valueField, Nothing)))
-				Next
+			If uihintAttr IsNot Nothing Then
+				Dim cpSortBy As Object = Nothing
+				Dim cpDescendingOrder As Object = Nothing
 
-				If sortByColumn = "Yes" Then
-					If sortDescending Then
-						selectData.Sort(CompareDesc)
-					Else
-						selectData.Sort(CompareAsc)
-					End If
+				If uihintAttr.ControlParameters.ContainsKey(ScaffoldConst.ForeignKey_RequireSorting) Then
+					cpSortBy = uihintAttr.ControlParameters(ScaffoldConst.ForeignKey_RequireSorting)
 				End If
 
-<#if(IsAsyncRepository) {#>
-				DropDownList1.AppendDataBoundItems = True
-<#}#>
-				DropDownList1.DataSource = selectData
-				DropDownList1.DataTextField = "Key"
-				DropDownList1.DataValueField = "Value"
-				DropDownList1.DataBind()
+				If uihintAttr.ControlParameters.ContainsKey(ScaffoldConst.ForeignKey_SortDesending) Then
+					cpDescendingOrder = uihintAttr.ControlParameters(ScaffoldConst.ForeignKey_SortDesending)
+				End If
 
-				If SetValue IsNot Nothing Then
+				sortByColumn = String.Empty
+				If cpSortBy IsNot Nothing Then
+					sortByColumn = cpSortBy.ToString()
+				End If
+
+				sortDescending = False
+				If cpDescendingOrder IsNot Nothing Then
+					sortDescending = Convert.ToBoolean(cpDescendingOrder)
+				End If
+			End If
+		End If
+	End Sub
+
+	' show bootstrap has-error
+	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+		Dim defaultValue As String = ""
+		' if validation error then apply bootstrap has-error CSS class
+		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+
+		If Not IsPostBack Then
+			If Me.Mode = DataBoundControlMode.Insert Then
+				DropDownList1.Items.Insert(0, New ListItem("Select An Option", ""))
+				DropDownList1.SelectedIndex = 0
+
+				defaultValue = Convert.ToString(Column.DefaultValue)
+
+				If defaultValue <> String.Empty Then
+					Dim li As ListItem = DropDownList1.Items.FindByValue(defaultValue)
+					If li IsNot Nothing Then
+						DropDownList1.SelectedValue = defaultValue
+					End If
+				End If
+			End If
+
+			If Me.Mode = DataBoundControlMode.Edit Then
+				If DropDownList1.Items.Count > 0 AndAlso SetValue IsNot Nothing Then
 					If SetValue = String.Empty Then
-						DropDownList1.Items.Insert(0, New ListItem("Not Set", ""))
+						If DropDownList1.Items(0).Text <> "Not Set" Then
+							DropDownList1.Items.Insert(0, New ListItem("Not Set", ""))
+						End If
 						DropDownList1.SelectedIndex = 0
 					Else
 						DropDownList1.SelectedValue = SetValue
 					End If
+				Else
+					If DropDownList1.Items.Count = 0 Then
+						DropDownList1.Items.Insert(0, New ListItem("None Available", ""))
+					End If
 				End If
 			End If
-		End Sub
+		End If
+	End Sub
 
-		Private Shared Function CompareAsc(a As KeyValuePair(Of String, String), b As KeyValuePair(Of String, String)) As Integer
-			Return a.Key.CompareTo(b.Key)
-		End Function
+	Protected Overrides Sub OnDataBinding(e As EventArgs)
+		MyBase.OnDataBinding(e)
 
-		Private Shared Function CompareDesc(a As KeyValuePair(Of String, String), b As KeyValuePair(Of String, String)) As Integer
-			Return b.Key.CompareTo(a.Key)
-		End Function
+		If Not IsPostBack Then
+			If Me.Mode = DataBoundControlMode.Edit Then
+				SetValue = FieldValueString
+			End If
+		End If
+	End Sub
 
-	End Class
-End Namespace
+	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+		' If it's an empty string, change it to null
+		Dim value As String = DropDownList1.SelectedValue
+		If [String].IsNullOrEmpty(value) Then
+			value = Nothing
+		End If
+
+		dictionary(Column.Name) = ConvertEditedValue(value)
+	End Sub
+
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return DropDownList1
+		End Get
+	End Property
+
+
+	Protected Sub DropDownList1_Load(sender As Object, e As EventArgs)
+		If Not IsPostBack Then
+			Dim fmea As New ForeignModelEventArgs()
+			fmea.returnResults = Nothing
+			fmea.foreignKeyModel = DataTypeName
+			fmea.keyType = ForeignModelEventArgs.LoadForeignTableByModel
+
+<#if(IsAsyncRepository) {#>
+			Me.Page.RegisterAsyncTask(New PageAsyncTask(Function() 
+				If Me.ForeignKey IsNot Nothing Then
+					Await RaiseEvent ForeignKey(fmea)
+					PopulateMainListControl(fmea.returnResults, DataValueField, DataTextField)
+				End If
+				End Function))
+<#}else {#>
+			If Me.ForeignKeyEvent IsNot Nothing Then
+				RaiseEvent ForeignKey(fmea)
+				PopulateMainListControl(fmea.returnResults, DataValueField, DataTextField)
+			End If
+<#}#>
+		End If
+	End Sub
+
+	Protected Sub PopulateMainListControl(dataSource As IQueryable, valueField As String, keyField As String)
+		Dim selectData = New List(Of KeyValuePair(Of String, String))()
+
+		If dataSource IsNot Nothing Then
+			For Each dataItem As Object In dataSource
+				selectData.Add(New KeyValuePair(Of String, String)(DataBinder.GetPropertyValue(dataItem, keyField, Nothing), DataBinder.GetPropertyValue(dataItem, valueField, Nothing)))
+			Next
+
+			If sortByColumn = "Yes" Then
+				If sortDescending Then
+					 selectData.Sort(Function(a As KeyValuePair(Of String, String), b As KeyValuePair(Of String, String))
+                                        Return a.Key.CompareTo(b.Key)
+                                    End Function)
+				Else
+                    selectData.Sort(Function(a As KeyValuePair(Of String, String), b As KeyValuePair(Of String, String))
+                                        Return b.Key.CompareTo(a.Key)
+                                    End Function)
+				End If
+			End If
+
+<#if(IsAsyncRepository) {#>
+			DropDownList1.AppendDataBoundItems = True
+<#}#>
+			DropDownList1.DataSource = selectData
+			DropDownList1.DataTextField = "Key"
+			DropDownList1.DataValueField = "Value"
+			DropDownList1.DataBind()
+
+			If SetValue IsNot Nothing Then
+				If SetValue = String.Empty Then
+					DropDownList1.Items.Insert(0, New ListItem("Not Set", ""))
+					DropDownList1.SelectedIndex = 0
+				Else
+					DropDownList1.SelectedValue = SetValue
+				End If
+			End If
+		End If
+	End Sub
+End Class

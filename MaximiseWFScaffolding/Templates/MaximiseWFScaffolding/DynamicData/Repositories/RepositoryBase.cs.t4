@@ -268,5 +268,27 @@ namespace <#= DefaultNamespace #>.Repositories
 
             return 0;
         }
+
+		public string CorrectSorting(string listViewSort, object sessionSort, object sessionOrder)
+		{
+			string sortExpression = sessionSort == null ? String.Empty : sessionSort.ToString();
+			SortDirection SDirection = sessionOrder == null ? SortDirection.Ascending : (SortDirection)sessionOrder;
+
+			if (listViewSort != null)
+			{
+				if (listViewSort.EndsWith(" DESC")) {
+					listViewSort = listViewSort.Substring(0, listViewSort.Length - 5);
+				}
+				listViewSort += (SDirection == SortDirection.Ascending ? "" : " DESC");
+			}
+			else
+			{
+				if (sortExpression != String.Empty) {
+					listViewSort = sortExpression + (SDirection == SortDirection.Ascending ? "" : " DESC");
+				}
+			}
+
+			return listViewSort;
+		}
     }
 }

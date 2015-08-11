@@ -25,7 +25,7 @@ Namespace <#= DefaultNamespace #>.Repositories
 	Public Class RepositoryAsyncBase(Of TEntity As Class, TKey)
 		Implements IRepositoryAsync(Of TEntity, TKey)
 		
-		Private ReadOnly dbrepContext As <#= DbContextTypeName #> = New <#= DbContextTypeName #>()
+		Private ReadOnly dbrepContext = New <#= DbContextTypeName #>()
 		Private ReadOnly dbrepSet As DbSet(Of TEntity)
 
 		Public Sub New()
@@ -37,7 +37,7 @@ Namespace <#= DefaultNamespace #>.Repositories
 	''' Retrieves one item of the TEntity class for edit or display
 	''' Note: Async and model binding do not play nice together, FormView will not bind to a return of a Task, so no async for getitem
 	''' </summary>
-	Public Function GetItem(<FriendlyUrlSegmentsAttribute(0)> id As TKey) As TEntity
+	Public Function GetItem(<FriendlyUrlSegmentsAttribute(0)> id As TKey) As TEntity Implements IRepository(Of TEntity, TKey).GetItem
 		If id Is Nothing Then
 			Return Nothing
 		End If
@@ -51,11 +51,11 @@ Namespace <#= DefaultNamespace #>.Repositories
 	''' Returns an IQuerybale list of TEntity which loads directly into the listview
 	''' Note: Async and model binding do not play nice together, listview will not bind to a return of the Task proxy class, (4.6 framework provides a solution)
 	''' </summary>
-	Public Function GetModelData(includeModel As String(), filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
+	Public Function GetModelData(includeModel As String(), filterData As String, sortByExpression As String) As IQueryable(Of TEntity) Implements IRepository(Of TEntity, TKey).GetModelData
 		Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
 
 		If Not String.IsNullOrEmpty(filterData) Then
-			query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
+			'query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
 		End If
 
 		For Each m As String In includeModel
@@ -79,11 +79,11 @@ Namespace <#= DefaultNamespace #>.Repositories
 	''' Load the default list of items from the database, which may include one or more filter options
 	''' Returns an IQuerybale list of TEntity which loads directly into the listview
 	''' </summary>
-	Public Function GetModelData(filterData As String, sortByExpression As String) As IQueryable(Of TEntity)
+	Public Function GetModelData(filterData As String, sortByExpression As String) As IQueryable(Of TEntity) Implements IRepository(Of TEntity, TKey).GetModelData
 		Dim query As IQueryable(Of TEntity) = dbrepSet.AsQueryable()
 
 		If Not String.IsNullOrEmpty(filterData) Then
-			query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
+			'query = dbrepSet.Where(FilterOnModel(filterData)).AsQueryable(Of TEntity)()
 		End If
 
 		If sortByExpression IsNot Nothing Then
@@ -178,7 +178,7 @@ Namespace <#= DefaultNamespace #>.Repositories
 	''' <summary>
 	''' Async inserts a record into the database using model binding
 	''' </summary>
-	Public Function InsertItemAsync(modelMethodContext As ModelMethodContext) As Task(Of Integer)
+	Public Function InsertItemAsync(modelMethodContext As ModelMethodContext) As Task(Of Integer) Implements IRepository(Of TEntity, TKey).InsertItemAsync
 		Dim ret As Integer = 0
 		Dim item = Me.dbrepSet.Create()
 		modelMethodContext.TryUpdateModel(item)
@@ -202,7 +202,7 @@ Namespace <#= DefaultNamespace #>.Repositories
 	''' <summary>
 	''' Async updates a record in the database using model binding
 	''' </summary>
-	Public Function UpdateItemAsync(id As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer)
+	Public Function UpdateItemAsync(id As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer) Implements IRepository(Of TEntity, TKey).UpdateItemAsync
 		Dim ret As Integer
 		Dim item = Me.dbrepSet.Find(id)
 		If item Is Nothing Then
@@ -228,7 +228,7 @@ Namespace <#= DefaultNamespace #>.Repositories
 	''' <summary>
 	''' Async deletes a record from the database
 	''' </summary>
-	Public Function DeleteItemAsync(id As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer)
+	Public Function DeleteItemAsync(id As TKey, modelMethodContext As ModelMethodContext) As Task(Of Integer) Implements IRepository(Of TEntity, TKey).DeleteItemAsync
 		Dim item = Me.dbrepSet.Find(id)
 		If item IsNot Nothing Then
 			Me.dbrepSet.Remove(item)

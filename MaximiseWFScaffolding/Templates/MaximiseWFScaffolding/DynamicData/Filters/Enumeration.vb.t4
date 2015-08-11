@@ -5,7 +5,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-<%@ Control Language="vb" CodeBehind="Enumeration.ascx.vb" Inherits="<#= DefaultNamespace #>.Filters.EnumerationFilter" %>
+<%@ Control Language="vb" CodeBehind="Enumeration.ascx.vb" Inherits="<#= DefaultNamespace #>.EnumerationFilter" %>
 <div runat="server" class="form-group">
 	<asp:DropDownList runat="server" ID="SFFilter_DropDownList1" 
 		AutoPostBack="True" 

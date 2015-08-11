@@ -1,4 +1,4 @@
-﻿<#@ Template Language="C#" HostSpecific="True"  #>
+﻿<#@ Template Language="C#" HostSpecific="True" #>
 <#@ Output Extension="vb" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
@@ -9,15 +9,10 @@ Public Partial Class LabelControl
 	Inherits System.Web.UI.UserControl
 
 	Private Const MAX_DISPLAYLENGTH_IN_LIST As Integer = 25
-
 	Public Property ForeignKeyText As String
 
-	Protected Sub Page_Load(sender As Object, e As EventArgs)
-	End Sub
-	
-	Public Sub LabelTextValue() as String
-
-		Dim value As String = If(this.ForeignKeyText, "")
+	Public Function LabelTextValue() as String
+		Dim value As String = If(ForeignKeyText, "")
 		value = Server.HtmlDecode(value)
 	
 		If value.Length > MAX_DISPLAYLENGTH_IN_LIST Then
@@ -25,12 +20,10 @@ Public Partial Class LabelControl
 		End If
 
 		Return value
+	End Function
 
-	End Sub
-
-	Public Overrides ReadOnly Property DataControl() As Control
-		Dim value As String = If(this.ForeignKeyText, "")
-		return Server.HtmlDecode(value)
-	End Property
-
+    Public Function ToolTipText() As String
+        Dim value As String = If(ForeignKeyText, "")
+        Return Server.HtmlDecode(value)
+    End Function
 End Class

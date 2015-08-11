@@ -33,14 +33,13 @@ namespace <#= FolderNamespace #>
 
             if (!IsPostBack)
             {
-				DataPager dp = (DataPager)lv<#= ModelName #>.FindControl("dp<#= ModelName #>");
-				if (dp != null)
+				if (dp<#= ModelName #> != null)
 				{
 					if (Session["<#= ModelName #>CurrentPage"] != null && Session["<#= ModelName #>PageSize"] != null) {
-						dp.SetPageProperties(Convert.ToInt32(Session["<#= ModelName #>CurrentPage"]), Convert.ToInt32(Session["<#= ModelName #>PageSize"]), true);
+						dp<#= ModelName #>.SetPageProperties(Convert.ToInt32(Session["<#= ModelName #>CurrentPage"]), Convert.ToInt32(Session["<#= ModelName #>PageSize"]), false);
 					}
 					else {
-						dp.SetPageProperties(0, 10, true);
+						dp<#= ModelName #>.SetPageProperties(0, 10, false);
 					}
 				}
             }
@@ -49,10 +48,9 @@ namespace <#= FolderNamespace #>
 		protected void ddlPageSize_SelectedIndexChanged(object sender,  EventArgs e)
         {
             DropDownList ddl = ((DropDownList)sender);
-            DataPager dp = (DataPager)lv<#= ModelName #>.FindControl("dp<#= ModelName #>");
-            dp.PageSize = Convert.ToInt32(ddl.SelectedValue);
-            Session["<#= ModelName #>PageSize"] = dp.PageSize;
-            dp.SetPageProperties(0, Convert.ToInt32(Session["<#= ModelName #>PageSize"]), true);
+            dp<#= ModelName #>.PageSize = Convert.ToInt32(ddl.SelectedValue);
+            Session["<#= ModelName #>PageSize"] = dp<#= ModelName #>.PageSize;
+            dp<#= ModelName #>.SetPageProperties(0, Convert.ToInt32(Session["<#= ModelName #>PageSize"]), false);
         }
 
 		protected void lv<#= ModelName #>_Sorting(object sender, ListViewSortEventArgs e)
@@ -78,6 +76,7 @@ namespace <#= FolderNamespace #>
             }
         }
 
+<#if (FilterOnModel == true) {#>
 		protected void ScaffoldLabel_PreRender(object sender, EventArgs e)
         {
             Label label = (Label)sender;
@@ -123,9 +122,8 @@ namespace <#= FolderNamespace #>
                 Session["<#= ModelName #>FilterDefault"] = FilterDefaults;
             }
 
-            DataPager dp = (DataPager)lv<#= ModelName #>.FindControl("dp<#= ModelName #>");
-            if (dp != null) {
-                dp.SetPageProperties(0, dp.PageSize, true);
+            if (dp<#= ModelName #> != null) {
+                dp<#= ModelName #>.SetPageProperties(0, dp<#= ModelName #>.PageSize, false);
             }
         }
 
@@ -139,6 +137,7 @@ namespace <#= FolderNamespace #>
             }
         }
 
+<#}#>
 <#if(IsAsyncRepository) {#>
 		public async Task ForeignKeyEventHandler_LoadForeignKey(ForeignModelEventArgs e)
         {

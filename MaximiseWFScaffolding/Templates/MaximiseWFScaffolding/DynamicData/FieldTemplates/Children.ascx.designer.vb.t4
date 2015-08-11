@@ -18,9 +18,6 @@
 Option Strict Off
 Option Explicit On
 
-
-
 Partial Public Class ChildrenField
-    
     Protected HyperLink1 As Global.System.Web.UI.WebControls.HyperLink
 End Class

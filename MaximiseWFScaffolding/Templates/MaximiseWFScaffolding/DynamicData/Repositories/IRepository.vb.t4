@@ -9,7 +9,7 @@ Imports System.Collections.Generic
 Imports System.Linq
 Imports System.Web.UI.WebControls
 
-Namespace <#= DefaultNamespace #>.Repositories
+Namespace Repositories
 	Public Interface IRepository(Of TEntity As Class, TKey)
 		Function GetItem(id As TKey) As TEntity
 		Function GetModelData(includeModel As String(), filterData As String, sortByExpression As String) As IQueryable(Of TEntity)

@@ -1,60 +1,60 @@
-<#@ Template Language="C#" HostSpecific="True"  #>
+﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
+Imports System.ComponentModel.DataAnnotations
+Imports <#= DefaultNamespace #>.Extenders
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class Integer_EditField
-		Inherits System.Web.DynamicData.FieldTemplateUserControl
+Public Partial Class Integer_EditField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
 
-		Protected Sub Page_Init(sender As Object, e As EventArgs)
-			TextBox1.ToolTip = Column.Description
-			Label1.Text = Column.DisplayName
-			TextBox1.Attributes.Add("placeholder", Column.Prompt)
+	Protected Sub Page_Init(sender As Object, e As EventArgs)
+		TextBox1.ToolTip = Column.Description
+		Label1.Text = Column.DisplayName
+		TextBox1.Attributes.Add("placeholder", Column.Prompt)
 
-			Dim rangeAttr As RangeAttribute = Nothing
+		Dim rangeAttr As RangeAttribute = Nothing
 
-			For Each attr As System.Attribute In Column.Attributes
-				If attr.GetType() Is GetType(RangeAttribute) Then
-					rangeAttr = attr
-					Exit For
-				End If
-			Next
-
-			If Column.IsRequired And Not rangeAttr Is Nothing Then
-				TextBox1.Attributes.Add("data-val", "true")
+		For Each attr As System.Attribute In Column.Attributes
+			If attr.GetType() Is GetType(RangeAttribute) Then
+				rangeAttr = attr
+				Exit For
 			End If
+		Next
 
-			If Column.IsRequired Then
-				TextBox1.Attributes.Add("data-val-required", Column.RequiredErrorMessage)
-			End If
+		If Column.IsRequired And Not rangeAttr Is Nothing Then
+			TextBox1.Attributes.Add("data-val", "true")
+		End If
 
-			If Not rangeAttr Is Nothing Then
-				TextBox1.Attributes.Add("data-val-range", rangeAttr.ErrorMessage)
-				TextBox1.Attributes.Add("data-val-range-min", rangeAttr.Minimum.ToString())
-				TextBox1.Attributes.Add("data-val-range-max", rangeAttr.Maximum.ToString())
-			End If
+		If Column.IsRequired Then
+			TextBox1.Attributes.Add("data-val-required", Column.RequiredErrorMessage)
+		End If
 
-		End Sub
+		If Not rangeAttr Is Nothing Then
+			TextBox1.Attributes.Add("data-val-range", rangeAttr.ErrorMessage)
+			TextBox1.Attributes.Add("data-val-range-min", rangeAttr.Minimum.ToString())
+			TextBox1.Attributes.Add("data-val-range-max", rangeAttr.Maximum.ToString())
+		End If
 
-		' show bootstrap has-error
-		Protected Sub Page_PreRender(sender As Object, e As EventArgs)
-			' if validation error then apply bootstrap has-error CSS class
-			Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
-			Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
-		End Sub
+	End Sub
 
-		Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
-			dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
-		End Sub
+	' show bootstrap has-error
+	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+		' if validation error then apply bootstrap has-error CSS class
+		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+	End Sub
 
-		Public Overrides ReadOnly Property DataControl() As Control
-			Get
-				Return TextBox1
-			End Get
-		End Property
-	End Class
-End Namespace
+	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+		dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
+	End Sub
+
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return TextBox1
+		End Get
+	End Property
+End Class

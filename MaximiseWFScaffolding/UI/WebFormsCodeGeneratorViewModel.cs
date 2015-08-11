@@ -399,17 +399,17 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.UI
                     ICodeTypeService codeTypeService = GetService<ICodeTypeService>();
                     Project project = _context.ActiveProject;
 
-
+                    // .Where(m => m.TypeName.ToLower().Contains("model"))
                     var modelTypes = codeTypeService
                                         .GetAllCodeTypes(project)
                                         .Where(codeType => codeType.IsValidWebProjectEntityType() && IsReallyValidWebProjectEntityType(codeType))
                                         .Select(codeType => new ModelType(codeType)).OrderBy(m => m.DisplayName);
+
                     _modelTypeCollection = new ObservableCollection<ModelType>(modelTypes);
                 }
                 return _modelTypeCollection;
             }
         }
-
 
         private bool IsReallyValidWebProjectEntityType(CodeType codeType)
         {
@@ -424,7 +424,6 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.UI
                 return false;
             }
         }
-
 
         public ObservableCollection<ModelType> DataContextTypeCollection
         {
@@ -453,7 +452,6 @@ namespace Microsoft.AspNet.Scaffolding.MaxWebForms.UI
                 return MasterPagePaths;
             }
         }
-
 
         private IEnumerable<string> MasterPagePaths
         {

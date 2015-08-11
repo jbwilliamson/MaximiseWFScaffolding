@@ -1,7 +1,4 @@
 ﻿<#@ Template Language="C#" HostSpecific="True"  #>
-<#@ Output Extension="cs" #>
-<#@ assembly name="System.Core" #>
-<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
@@ -12,7 +9,7 @@ Imports System.ComponentModel.DataAnnotations
 Imports System.Web.DynamicData
 Imports System.Web
 
-Namespace <#= DefaultNamespace #>.Extenders
+Namespace Extenders
 	Public NotInheritable Class ValidationConstants
 		Private Sub New()
 		End Sub

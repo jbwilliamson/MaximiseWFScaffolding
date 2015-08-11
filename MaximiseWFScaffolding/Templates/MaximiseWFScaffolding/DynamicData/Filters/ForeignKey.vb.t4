@@ -5,7 +5,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-<%@ Control Language="vb" CodeBehind="ForeignKey.ascx.vb" Inherits="<#= DefaultNamespace #>.Filters.ForeignKeyFilter" %>
+<%@ Control Language="vb" CodeBehind="ForeignKey.ascx.vb" Inherits="<#= DefaultNamespace #>.ForeignKeyFilter" %>
 <div runat="server" class="form-group">
 	<asp:DropDownList runat="server" ID="SFFilter_DropDownList1" 
 		AppendDataBoundItems="true"

@@ -5,7 +5,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-<%@ Control Language="VB" CodeBehind="Enumeration_Edit.ascx.vb" Inherits="<#= DefaultNamespace #>.FieldTemplates.Enumeration_EditField" %>
+<%@ Control Language="VB" CodeBehind="Enumeration_Edit.ascx.vb" Inherits="<#= DefaultNamespace #>.Enumeration_EditField" %>
 <div id="Div1" runat="server" class="form-group">
     <asp:Label ID="Label1" runat="server" CssClass="col-sm-2 control-label" AssociatedControlID="DropDownList1" />
     <div class="col-sm-3">

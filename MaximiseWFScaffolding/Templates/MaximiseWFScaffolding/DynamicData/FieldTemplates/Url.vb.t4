@@ -5,5 +5,5 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-<%@ Control Language="VB" CodeBehind="Url.ascx.vb" Inherits="<#= DefaultNamespace #>.FieldTemplates.UrlField" %>
+<%@ Control Language="VB" CodeBehind="Url.ascx.vb" Inherits="<#= DefaultNamespace #>.UrlField" %>
 <asp:HyperLink ID="HyperLinkUrl" runat="server" Text="<%# FieldValueString %>" Target="_blank" />

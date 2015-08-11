@@ -6,8 +6,6 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class PhoneNumberField
-		Protected Literal1 As Global.System.Web.UI.WebControls.Literal
-	End Class
-End Namespace
+Public Partial Class PhoneNumberField
+	Protected Literal1 As Global.System.Web.UI.WebControls.Literal
+End Class

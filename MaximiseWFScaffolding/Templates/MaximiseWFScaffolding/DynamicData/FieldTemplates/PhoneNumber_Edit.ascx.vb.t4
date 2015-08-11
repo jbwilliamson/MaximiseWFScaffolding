@@ -6,114 +6,111 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
 <#@ parameter type="System.String" name="ClientSideValidation" #>
-
 Imports System.ComponentModel.DataAnnotations
 Imports System.Web.DynamicData
-Imports System.Web
 Imports System.Linq
 Imports <#= DefaultNamespace #>.Extenders
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class PhoneNumber_EditField
-		Inherits System.Web.DynamicData.FieldTemplateUserControl
+Public Partial Class PhoneNumber_EditField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
 
-		Public Property SetFocus() As String
-			Get
-				Return m_SetFocus
-			End Get
-			Set
-				m_SetFocus = Value
-			End Set
-		End Property
-		Private m_SetFocus As String
+	Public Property SetFocus() As String
+		Get
+			Return m_SetFocus
+		End Get
+		Set
+			m_SetFocus = Value
+		End Set
+	End Property
+	Private m_SetFocus As String
 
-		Protected Sub Page_Init(sender As Object, e As EventArgs)
-			If Not IsPostBack Then
+	Protected Sub Page_Init(sender As Object, e As EventArgs)
+		If Not IsPostBack Then
 <#if (ClientSideValidation == "HTML5") {#>
-				Dim errorMessage As String = ""
+			Dim errorMessage As String = ""
 <#}#>
-				TextBox1.ToolTip = Column.Description
-				Label1.Text = Column.DisplayName + " :"
+			TextBox1.ToolTip = Column.Description
+			Label1.Text = Column.DisplayName + " :"
 
-				If Column.Prompt IsNot Nothing AndAlso Column.Prompt.Length > 0 Then
-					TextBox1.Attributes.Add("placeholder", Column.Prompt)
-				End If
+			If Column.Prompt IsNot Nothing AndAlso Column.Prompt.Length > 0 Then
+				TextBox1.Attributes.Add("placeholder", Column.Prompt)
+			End If
 
-				If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
-					TextBox1.Attributes.Add("autofocus", "autofocus")
-				End If
+			If SetFocus IsNot Nothing AndAlso SetFocus = "True" Then
+				TextBox1.Attributes.Add("autofocus", "autofocus")
+			End If
 
 <#if (ClientSideValidation != "None") {#>
-				Dim regularExpressionAttr As RegularExpressionAttribute = Column.Attributes.OfType(Of RegularExpressionAttribute)().SingleOrDefault()
+			Dim regularExpressionAttr As RegularExpressionAttribute = Column.Attributes.OfType(Of RegularExpressionAttribute)().SingleOrDefault()
 <#if (ClientSideValidation == "Unobtrusive") {#>
-				If Column.IsRequired OrElse regularExpressionAttr IsNot Nothing Then
-					TextBox1.Attributes.Add("data-val", "true")
-				End If
+			If Column.IsRequired OrElse regularExpressionAttr IsNot Nothing Then
+				TextBox1.Attributes.Add("data-val", "true")
+			End If
 <#}#>
 <#if (ClientSideValidation == "HTML5") {#>
 
-				If Column.IsRequired OrElse regularExpressionAttr IsNot Nothing Then
-					TextBox1.Attributes.Add("data-val-clear", "")
-					If Column.IsRequired Then
-						TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.value.length > 0 ? this.dataset.valClear : this.dataset.valRequired);")
-					Else
-						TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.title);")
-					End If
-				End If
-<#}#>
-
+			If Column.IsRequired OrElse regularExpressionAttr IsNot Nothing Then
+				TextBox1.Attributes.Add("data-val-clear", "")
 				If Column.IsRequired Then
+					TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.value.length > 0 ? this.dataset.valClear : this.dataset.valRequired);")
+				Else
+					TextBox1.Attributes.Add("oninput", "setCustomValidity(this.validity.valid ? this.dataset.valClear : this.title);")
+				End If
+			End If
+<#}#>
+
+			If Column.IsRequired Then
 <#if (ClientSideValidation == "HTML5") {#>
-					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-					TextBox1.Attributes.Add("required", "required")
-					errorMessage = "this.validity.valueMissing ? this.dataset.valRequired : "
+				TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+				TextBox1.Attributes.Add("required", "required")
+				errorMessage = "this.validity.valueMissing ? this.dataset.valRequired : "
 <#} else {#>
 <#}#>
-					TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
-				End If
+				TextBox1.Attributes.Add("data-val-required", If(Column.RequiredErrorMessage Is Nothing, ValidationConstants.Validation_Required_DefaultError, Column.RequiredErrorMessage))
+			End If
 
-				If regularExpressionAttr IsNot Nothing AndAlso regularExpressionAttr.Pattern IsNot Nothing AndAlso regularExpressionAttr.Pattern.Length > 0 Then
+			If regularExpressionAttr IsNot Nothing AndAlso regularExpressionAttr.Pattern IsNot Nothing AndAlso regularExpressionAttr.Pattern.Length > 0 Then
 <#if (ClientSideValidation == "Unobtrusive") {#>
-					TextBox1.Attributes.Add("data-val-regex-pattern", regularExpressionAttr.Pattern)
-					TextBox1.Attributes.Add("data-val-regex", If(regularExpressionAttr.ErrorMessage Is Nothing, ValidationConstants.Validation_Pattern_DefaultError, regularExpressionAttr.ErrorMessage))
+				TextBox1.Attributes.Add("data-val-regex-pattern", regularExpressionAttr.Pattern)
+				TextBox1.Attributes.Add("data-val-regex", If(regularExpressionAttr.ErrorMessage Is Nothing, ValidationConstants.Validation_Pattern_DefaultError, regularExpressionAttr.ErrorMessage))
 <#} else {#>
-					TextBox1.Attributes.Add("pattern", regularExpressionAttr.Pattern)
-					TextBox1.Attributes.Add("data-val-regex", If(regularExpressionAttr.ErrorMessage Is Nothing, ValidationConstants.Validation_Pattern_DefaultError, regularExpressionAttr.ErrorMessage))
+				TextBox1.Attributes.Add("pattern", regularExpressionAttr.Pattern)
+				TextBox1.Attributes.Add("data-val-regex", If(regularExpressionAttr.ErrorMessage Is Nothing, ValidationConstants.Validation_Pattern_DefaultError, regularExpressionAttr.ErrorMessage))
 <#}#>
-					errorMessage = errorMessage & "this.validity.patternMismatch ? this.dataset.valRegex : "
-				End If
+				errorMessage = errorMessage & "this.validity.patternMismatch ? this.dataset.valRegex : "
+			End If
 <#if (ClientSideValidation == "HTML5") {#>
 
-				errorMessage = "setCustomValidity(" & errorMessage & "this.dataset.valClear);"
+			errorMessage = "setCustomValidity(" & errorMessage & "this.dataset.valClear);"
 <#}#>
 <#}#>
-				TextBox1.Attributes.Add("oninvalid", errorMessage)
-			End If
-		End Sub
+			TextBox1.Attributes.Add("oninvalid", errorMessage)
+		End If
+	End Sub
 
-		' show bootstrap has-error
-		Protected Sub Page_PreRender(sender As Object, e As EventArgs)
-			' if validation error then apply bootstrap has-error CSS class
-			Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
-			Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
+	' show bootstrap has-error
+	Protected Sub Page_PreRender(sender As Object, e As EventArgs)
+		' if validation error then apply bootstrap has-error CSS class
+		Dim isValid = Me.Page.ModelState.IsValidField(Column.Name)
+		Div1.Attributes("class") = If(isValid, "form-group", "form-group has-error")
 
-		End Sub
+	End Sub
 
-		Protected Overrides Sub OnDataBinding(e As EventArgs)
-			MyBase.OnDataBinding(e)
-			If Column.MaxLength > 0 Then
-				TextBox1.MaxLength = Math.Max(FieldValueEditString.Length, Column.MaxLength)
-			End If
-		End Sub
+	Protected Overrides Sub OnDataBinding(e As EventArgs)
+		MyBase.OnDataBinding(e)
+		If Column.MaxLength > 0 Then
+			TextBox1.MaxLength = Math.Max(FieldValueEditString.Length, Column.MaxLength)
+		End If
+	End Sub
 
-		Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
-			dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
-		End Sub
+	Protected Overrides Sub ExtractValues(dictionary As IOrderedDictionary)
+		dictionary(Column.Name) = ConvertEditedValue(TextBox1.Text)
+	End Sub
 
-		Public Overrides ReadOnly Property DataControl() As Control
-			Get
-				Return TextBox1
-			End Get
-		End Property
-	End Class
-End Namespace
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return TextBox1
+		End Get
+	End Property
+End Class
+

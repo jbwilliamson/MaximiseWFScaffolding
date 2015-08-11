@@ -44,13 +44,14 @@ if (property.IsForeignKey) { #>
         <asp:HyperLink runat="server" NavigateUrl="Insert" Text="Create new" />
     </p>
 
+<#if (FilterOnModel == true) {#>
     <scf:ScaffoldingFilterRepeater runat="server" ID="FilterRepeater" ModelName="<#=FullModelName#>, <#= DefaultNamespace #>" ScaffoldFilterContainerId="">
     <ItemTemplate>
         <asp:Label runat="server" Text='<%# Eval("DisplayName") %>' OnPreRender="ScaffoldLabel_PreRender" />
         <scf:ScaffoldFilterControl runat="server" ID="ScaffoldFilter" OnFilterChanged="ScaffoldFilter_FilterChanged" OnFilterLoad="ScaffoldFilter_FilterLoad" OnLoad="sfForeignKey_Load"/>
     </ItemTemplate>
     </scf:ScaffoldingFilterRepeater>
-
+<#}#>
     <div>
         <asp:ListView id="lv<#= ModelName #>" runat="server"
             DataKeyNames="<#= PrimaryKeyName #>"
@@ -82,26 +83,6 @@ var relatedModel = RelatedModels[property.PropertyName];#>
                         <tr runat="server" id="itemPlaceholder" />
                     </tbody>
                 </table>
-				<asp:DataPager ID="dp<#= ModelName #>" PageSize="10" runat="server">
-					<Fields>
-						<asp:TemplatePagerField>
-							<PagerTemplate>
-								<asp:Label runat="server" AssociatedControlID="ddlPageSize">Page Size</asp:Label>
-								<asp:DropDownList runat="server" id="ddlPageSize" OnSelectedIndexChanged="ddlPageSize_SelectedIndexChanged" OnPreRender="ddlPageSize_PreRender" AutoPostBack="true">
-									<asp:ListItem Value="10" />
-									<asp:ListItem Value="15" />
-									<asp:ListItem Value="20" />
-									<asp:ListItem Value="25" />
-									<asp:ListItem Value="30" />
-								</asp:DropDownList>
-							</PagerTemplate>
-						</asp:TemplatePagerField>
-						
-						<asp:NextPreviousPagerField ShowLastPageButton="False" ShowNextPageButton="False" ButtonType="Button" ButtonCssClass="btn" />
-                        <asp:NumericPagerField ButtonType="Button"  NumericButtonCssClass="btn" CurrentPageLabelCssClass="btn disabled" NextPreviousButtonCssClass="btn" />
-                        <asp:NextPreviousPagerField ShowFirstPageButton="False" ShowPreviousPageButton="False" ButtonType="Button" ButtonCssClass="btn" />
-                    </Fields>
-				</asp:DataPager>
             </LayoutTemplate>
             <ItemTemplate>
                 <tr>
@@ -110,7 +91,7 @@ if (ShouldDisplay(property)) {
 if (GridView[property.PropertyName] == "true") {
 if (property.IsForeignKey) { 
 var relatedModel = RelatedModels[property.PropertyName];#>
-					<td><LC:Foreign runat="server" ForeignKeyText='<%# Item.<#=relatedModel.AssociationPropertyName#> == null ? "Not Set" : Item.<#=relatedModel.AssociationPropertyName#>.<#=relatedModel.DisplayPropertyName#> == null ? "Not Set" : Item.<#=relatedModel.AssociationPropertyName#>.<#=relatedModel.DisplayPropertyName#> %>' /></td>
+					<td><LC:Foreign runat="server" ForeignKeyText='<%# If(Item.<#=relatedModel.AssociationPropertyName#> is Nothing, "Not Set", If (Item.<#=relatedModel.AssociationPropertyName#>.<#=relatedModel.DisplayPropertyName#> is Nothing, "Not Set", Item.<#=relatedModel.AssociationPropertyName#>.<#=relatedModel.DisplayPropertyName#>)) %>' /></td>
 <#} else{#>
 					<td><asp:DynamicControl runat="server" DataField="<#= property.PropertyName #>" ID="<#= property.PropertyName #>" Mode="ReadOnly" /></td>
 <#}}}}#>
@@ -122,6 +103,26 @@ var relatedModel = RelatedModels[property.PropertyName];#>
                 </tr>
             </ItemTemplate>
         </asp:ListView>
+		<asp:DataPager ID="dp<#= ModelName #>" PageSize="10" runat="server" PagedControlID="lv<#= ModelName #>">
+			<Fields>
+				<asp:TemplatePagerField>
+					<PagerTemplate>
+						<asp:Label runat="server" AssociatedControlID="ddlPageSize">Page Size</asp:Label>
+						<asp:DropDownList runat="server" id="ddlPageSize" OnSelectedIndexChanged="ddlPageSize_SelectedIndexChanged" OnPreRender="ddlPageSize_PreRender" AutoPostBack="true">
+							<asp:ListItem Value="10" />
+							<asp:ListItem Value="15" />
+							<asp:ListItem Value="20" />
+							<asp:ListItem Value="25" />
+							<asp:ListItem Value="30" />
+						</asp:DropDownList>
+					</PagerTemplate>
+				</asp:TemplatePagerField>
+						
+				<asp:NextPreviousPagerField ShowLastPageButton="False" ShowNextPageButton="False" ButtonType="Button" ButtonCssClass="btn" />
+                <asp:NumericPagerField ButtonType="Button"  NumericButtonCssClass="btn" CurrentPageLabelCssClass="btn disabled" NextPreviousButtonCssClass="btn" />
+                <asp:NextPreviousPagerField ShowFirstPageButton="False" ShowPreviousPageButton="False" ButtonType="Button" ButtonCssClass="btn" />
+            </Fields>
+		</asp:DataPager>
     </div>
 <#
 // The following code closes the asp:Content tag used in the case of a master page and the body and html tags in the case of a regular view page

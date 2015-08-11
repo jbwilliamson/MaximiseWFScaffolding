@@ -1,19 +1,24 @@
 ﻿<#@ Template Language="C#" HostSpecific="True"  #>
 <#@ Output Extension="vb" #>
-<#@ include file="Imports.include.t4" #>
-Imports <#= DefaultNamespace #>.Extenders;
-Imports <#= DefaultNamespace #>.Repositories;
+<#@ include file="Imports.include.t4" #><##>
+<#if(IsAsyncRepository) {#>
+Imports System.Threading.Tasks
+<#}#>
+Imports <#= DefaultNamespace #>.Extenders
+Imports <#= DefaultNamespace #>.Repositories
 
 Public Partial Class <#=CodeBesideName#>
 	Inherits System.Web.UI.Page
-
-	Private _repository As New <#=ModelName#>Repository(Of <#=FullModelName#>, System.Nullable(Of <#=PrimaryKeyType#>))()
+<#if(IsAsyncRepository) {#>
+	Private _repository As New <#= ModelName #>RepositoryAsync(Of <#=FullModelName#>, <#=PrimaryKeyType#>)()
+<#} else {#>
+	Private _repository As New <#= ModelName #>Repository(Of <#=FullModelName#>, <#=PrimaryKeyType#>)()
+<#}#>
 
 	Protected Sub Page_Init()
-		fvCourse.SetDataMethodsObject(_repository)
-		fvCourse.RedirectToRouteOnItemCommand("~/<#=RelativePath#>/Default")
+		fv<#= ModelName #>.SetDataMethodsObject(_repository)
+		fv<#= ModelName #>.RedirectToRouteOnItemCommand("~/<#=RelativePath#>/Default")
 	End Sub
 
 End Class
-
 <#@ include file="ModelMetadataFunctions.cs.include.t4" #>

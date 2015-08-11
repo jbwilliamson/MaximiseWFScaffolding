@@ -6,15 +6,13 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Public Partial Class PhoneNumberField
-		Inherits System.Web.DynamicData.FieldTemplateUserControl
+Public Partial Class PhoneNumberField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
 
-		Public Overrides ReadOnly Property DataControl() As Control
-			Get
-				Return Literal1
-			End Get
-		End Property
+	Public Overrides ReadOnly Property DataControl() As Control
+		Get
+			Return Literal1
+		End Get
+	End Property
+End Class
 
-	End Class
-End Namespace

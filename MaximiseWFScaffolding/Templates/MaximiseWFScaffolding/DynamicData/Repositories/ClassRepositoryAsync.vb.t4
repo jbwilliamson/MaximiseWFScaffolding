@@ -12,7 +12,7 @@ Imports System.Web.UI.WebControls
 Imports System.Threading.Tasks
 Imports ScaffoldFilter
 
-Namespace <#= DefaultNamespace #>.Repositories
+Namespace Repositories
 	Public Class <#= ModelName #>RepositoryAsync(Of TEntity As Class, TKey)
 		Inherits RepositoryBase(Of TEntity, TKey)
 		Public Sub New()

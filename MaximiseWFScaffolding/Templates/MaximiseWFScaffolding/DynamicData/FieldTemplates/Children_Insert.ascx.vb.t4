@@ -6,12 +6,9 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
 Imports System.ComponentModel.DataAnnotations
-Imports System.Web.DynamicData
-Imports System.Web
 
-Namespace <#= DefaultNamespace #>.FieldTemplates
-	Class Children_InsertField
-		Inherits FieldTemplateUserControl
+Class Children_InsertField
+	Inherits System.Web.DynamicData.FieldTemplateUserControl
 
-	End Class
-End Namespace
+End Class
+

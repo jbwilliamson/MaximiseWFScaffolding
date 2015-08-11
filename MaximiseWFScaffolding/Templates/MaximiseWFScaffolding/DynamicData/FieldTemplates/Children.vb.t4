@@ -5,5 +5,5 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ parameter type="System.String" name="DefaultNamespace" #>
-<%@ Control Language="VB" CodeBehind="Children.ascx.vb" Inherits="<#= DefaultNamespace #>.FieldTemplates.ChildrenField" %>
+<%@ Control Language="VB" CodeBehind="Children.ascx.vb" Inherits="<#= DefaultNamespace #>.ChildrenField" %>
 <asp:HyperLink ID="HyperLink1" runat="server" NavigateUrl="<%# GetChildrenPath() %>" />

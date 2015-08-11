@@ -25,21 +25,11 @@ namespace <#= DefaultNamespace #>.Repositories
         {
 <#			string includes = GetIncludeListCS();#>
 			<#=includes#>
+			System.Web.SessionState.HttpSessionState s = System.Web.HttpContext.Current.Session;
 
-            if (sortByExpression == null)
-            {
-                System.Web.SessionState.HttpSessionState s = System.Web.HttpContext.Current.Session;
-
-                if (s != null)
-                {
-                    string sortExpression = s["<#= ModelName #>SortExpression"] == null ? string.Empty : s["<#= ModelName #>SortExpression"].ToString();
-                    SortDirection sortDirection = s["<#= ModelName #>SortDirection"] == null ? SortDirection.Ascending : (SortDirection)s["<#= ModelName #>SortDirection"];
-
-                    if (sortExpression != string.Empty) {
-                        sortByExpression = sortExpression + (sortDirection == SortDirection.Ascending ? "" : " DESC");
-                    }
-                }
-            }
+			if (s != null) {
+				sortByExpression = CorrectSorting(sortByExpression, s["<#= ModelName #>SortExpression"], s["<#= ModelName #>SortDirection"]);
+			}
 
 <#if (GetIncludeListCS().Length > 0) {#>
 			return base.GetModelData(includes, filterData, sortByExpression);
